@@ -1,0 +1,9 @@
+## Interface: 60000
+## Author: Jultomten 
+## Version: 9000.1
+## Title: Guild Skada High Score
+## Notes: Ranking for dps/hps for raid bosses in a guild.
+## Dependencies: Skada
+
+lib/lib.xml
+main.xml

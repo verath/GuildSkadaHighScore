@@ -13,22 +13,9 @@ tinsert(addonTable, addon);
 _G[addonName] = addon
 
 addon.currentEncounter = nil;
+addon.currentZoneId = nil;
 addon.guildName = nil;
 addon.inspect = {};
-addon.notifyInspectQueue = {};
-addon.notifyInspectTimer = nil;
-addon.currentInspectPlayer = nil;
-addon.pendingInspects = {};
-
-local INSPECT_CACHE_TIMEOUT = 900;
-local INVENTORY_SLOT_NAMES = {
-	"HeadSlot","NeckSlot","ShoulderSlot","BackSlot","ChestSlot","WristSlot",
-	"HandsSlot","WaistSlot","LegsSlot","FeetSlot","Finger0Slot","Finger1Slot",
-	"Trinket0Slot","Trinket1Slot","MainHandSlot","SecondaryHandSlot"
-}
-
-local playerGUID = UnitGUID("player");
-local inspectCache = {};
 
 local function getDifficultyNameById(difficultyId)
 	if difficultyId == 7 or difficultyId == 17 then
@@ -59,6 +46,20 @@ function addon:UpdateMyGuildName()
 	end
 end
 
+function addon:SetCurrentEncounter(encounterId, encounterName, difficultyId, raidSize)
+	self.currentEncounter = {
+		id = encounterId, 
+		name = encounterName, 
+		difficultyId = difficultyId,
+		difficultyName = getDifficultyNameById(difficultyId),
+		raidSize = raidSize
+	}
+end
+
+function addon:UnsetCurrentEncounter()
+	self.currentEncounter = nil
+end
+
 function addon:IsInMyGuild(playerName)
 	if 1 then return true end
 	if self.guildName then
@@ -81,224 +82,16 @@ function addon:GetGuildPlayersFromSet(skadaSet)
 	return players
 end
 
-function addon:GetTalentSpec(unitName)
-	if unitName == "player" then
-		local spec = GetSpecialization();
-		if spec and spec > 0 then
-			local _, name = GetSpecializationInfo(spec);
-			return name;
-		end
-	else
-		local spec = GetInspectSpecialization(unitName)
-		if spec and spec > 0 then
-			local role = GetSpecializationRoleByID(spec);
-			if role then
-				local _, name = GetSpecializationInfoByID(spec);
-				return name
-			end
-		end
-	end
-end
-
-function addon:GetItemLevel(unitName) 
-	if unitName == "player" then
-		local _, equipped = GetAverageItemLevel();
-		return floor(equipped);
-	else
-		local total, numItems = 0, 0;
-		for i = 1, #INVENTORY_SLOT_NAMES do
-			local slotName = INVENTORY_SLOT_NAMES[i];
-			local slotId = GetInventorySlotInfo(slotName);
-			local itemLink = GetInventoryItemLink(unitName, slotId);
-			
-			if itemLink then
-				local _, _, _, itemLevel = GetItemInfo(itemLink)
-				if itemLevel and itemLevel > 0 then
-					numItems = numItems + 1;
-					total = total + itemLevel;
-				end
-			end
-		end
-		if total < 1 or numItems < 15 then
-			return nil
-		else 
-			return floor(total / numItems)
-		end
-	end
-end
-
-function addon:UpdatePlayerInspectCache(playerId, unitName)
-	if UnitExists(unitName) then	
-		inspectCache[playerId] = {}
-		inspectCache[playerId].time = GetTime()
-		inspectCache[playerId].specName = self:GetTalentSpec(unitName)
-		inspectCache[playerId].itemLevel = self:GetItemLevel(unitName)
-	end
-end
-
-function addon:HasPlayerInspectCache(playerId)
-	if not inspectCache[playerId] then
-		return false; -- No entry for player id
-	elseif (GetTime() - inspectCache[playerId].time) > INSPECT_CACHE_TIMEOUT then
-		inspectCache[playerId] = nil;
-		return false; -- Cache entry is too old
-	else
-		return true;
-	end 
-end
-
-function addon:FetchInformationForPlayers(players, callback)
-	local playersToInspect = {}
-
+function addon:SetRoleForPlayers(players)
 	for _, player in ipairs(players) do
-		if player.id == playerGUID then
-			player.specName = self:GetTalentSpec("player");
-			player.itemLevel = self:GetItemLevel("player")
-		elseif self:HasPlayerInspectCache(player.id) then
-			player.specName = inspectCache[player.id].specName;
-			player.itemLevel = inspectCache[player.id].itemLevel;
-		else
-			inspectCache[player.id] = nil;
-			if CanInspect(player.name, false) then 
-				tinsert(playersToInspect, player)
-			end
-		end
-	end
-
-	if #playersToInspect == 0 then
-		callback(players);
-	else
-		local pendingInspectData = {callback = callback, players = players, pendingIds = {}};
-		for _, player in ipairs(playersToInspect) do
-			tinsert(pendingInspectData.pendingIds, player.id);
-		end
-		tinsert(self.pendingInspects, pendingInspectData);
-
-		for _, player in ipairs(playersToInspect) do
-			self:QueueInspect(player);
-		end
-		
-	end
-end
-
-function addon:SetCurrentEncounter(encounterId, encounterName, difficultyId, raidSize)
-	self.currentEncounter = {
-		id = encounterId, 
-		name = encounterName, 
-		difficultyId = difficultyId,
-		difficultyName = getDifficultyNameById(difficultyId),
-		raidSize = raidSize
-	}
-end
-
-function addon:UnsetCurrentEncounter()
-	self.currentEncounter = nil
-end
-
-function addon:StartNotifyInspectTimer()
-	if not self.notifyInspectTimer then
-		self.notifyInspectTimer = self:ScheduleRepeatingTimer("NOTIFY_INSPECT_TIMER_DONE", 1)
-	end
-end
-
-function addon:StopNotifyInspectTimer()
-	if self.notifyInspectTimer then
-		self:CancelTimer(self.notifyInspectTimer)
-	end
-end
-
-function addon:QueueInspect(player)
-	self:Debug("QueueNotifyInspect " .. player.name)
-
-	local playerInQueue = false
-	for _, p in ipairs(self.notifyInspectQueue) do
-		if p.name == player.name then
-			playerInQueue = true;
-			break;
-		end
-	end
-
-	if not playerInQueue then
-		tinsert(self.notifyInspectQueue, player);
-		self:StartNotifyInspectTimer();
-	end	
-end
-
-function addon:ResolveInspect(player, success)
-	self:Debug("ResolveInspect " .. player.name .. " " .. (success and "success" or "fail"))
-
-	local finishedInspectIndexes = {};
-
-	for inspectIndex, pendingInspectData in ipairs(self.pendingInspects) do
-		local players = pendingInspectData.players;
-		local pendingIds = pendingInspectData.pendingIds;
-		local callback = pendingInspectData.callback;
-
-		-- Search for a pending id matching the inspected player id, remove
-		-- if found
-		local playerFound = false
-		for idx, id in ipairs(pendingIds) do
-			if id == player.id then
-				tremove(pendingIds, idx);
-				playerFound = true;
-				break
-			end
-		end
-
-		if playerFound then
-			if success then
-				-- Update inspect data, unless already updated
-				if not self:HasPlayerInspectCache(player.id) then
-					self:UpdatePlayerInspectCache(player.id, player.name);
-				end
-				ClearInspectPlayer();
-				player.specName = inspectCache[player.id].specName;
-				player.itemLevel = inspectCache[player.id].itemLevel;
-			else
-				if self:HasPlayerInspectCache(player.id) then
-					player.specName = inspectCache[player.id].specName;
-					player.itemLevel = inspectCache[player.id].itemLevel;
-				end
-			end
-
-			-- If this was the last pending player, this pending inspect
-			-- group is now done
-			if #pendingIds == 0 then
-				tinsert(finishedInspectIndexes, inspectIndex);
-			end
-		end
-	end
-
-	for _, idx in ipairs(finishedInspectIndexes) do
-		local finishedInspect = tremove(self.pendingInspects, idx);
-		finishedInspect.callback(finishedInspect.players);
-	end
-end
-
-function addon:NOTIFY_INSPECT_TIMER_DONE()
-	self:Debug("NOTIFY_INSPECT_TIMER_DONE");
-
-	if self.currentInspectPlayer then
-		addon:ResolveInspect(self.currentInspectPlayer, false)
-		self.currentInspectPlayer = nil;
-	end
-
-	if #self.notifyInspectQueue > 0 then 
-		local inspectPlayer = tremove(self.notifyInspectQueue);
-		NotifyInspect(inspectPlayer.name);
-		self.currentInspectPlayer = inspectPlayer;
-	else
-		return
+		player.role = UnitGroupRolesAssigned(player.name);
 	end
 end
 
 function addon:INSPECT_READY(evt, GUID)
 	self:Debug("INSPECT_READY (" .. GUID .. ")")
 
-	if self.currentInspectPlayer and self.currentInspectPlayer.id == GUID then
-		addon:ResolveInspect(self.currentInspectPlayer, true)
-		self.currentInspectPlayer = nil;
-	end
+	self.inspect:INSPECT_READY(evt, GUID);
 end
 
 function addon:PLAYER_GUILD_UPDATE(evt, unitId)
@@ -325,20 +118,23 @@ end
 function addon:EndSegment()
 	self:Debug("EndSegment")
 	
-	if not Skada.last.gotboss then
+	if not self.currentEncounter or not Skada.last.gotboss then
 		self:Debug("Not a boss")
 		return
 	end
 
 	local encounter = self.currentEncounter
 	local players = self:GetGuildPlayersFromSet(Skada.last);
-	self:FetchInformationForPlayers(players, function(players)
+	self:SetRoleForPlayers(players);
+	self.inspect:GetInspectDataForPlayers(players, function()
 		for i, player in ipairs(players) do
 			local name = player.name;
-			local damage = player.damage;
+			local damage = Skada:FormatNumber(player.damage);
+			local role = player.role;
 			local itemLevel = player.itemLevel and player.itemLevel or "N/A"
 			local specName = player.specName and player.specName or "N/A"
-			self:Debug(name .. " " .. itemLevel .. " " .. specName .. " " .. damage);
+			-- "(DAMAGE) Saniera - 20.1k (560 Shadow)"
+			self:Debug(format("(%s) %s - %s (%d %s)", role, name, damage, itemLevel, specName));
 		end
 	end)
 

@@ -1,6 +1,6 @@
 ## Interface: 60000
-## Author: Jultomten 
-## Version: 9000.1
+## Author: Verath (Peter Eliasson) 
+## Version: 0.01
 ## Title: Guild Skada High Score
 ## Notes: Ranking for dps/hps for raid bosses in a guild.
 ## Dependencies: Skada

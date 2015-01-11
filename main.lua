@@ -1,21 +1,25 @@
 local addonName, addonTable = ...
 
 local tinsert = tinsert;
-local tremove = tremove;
-local tContains = tContains;
-local floor = floor;
 
 -- Create ACE3 addon
-local addon = LibStub("AceAddon-3.0"):NewAddon(addonName, 
-	"AceConsole-3.0", "AceEvent-3.0", "AceHook-3.0", "AceTimer-3.0")
+local addon = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0", "AceEvent-3.0", "AceHook-3.0")
+
+-- Set up a default prototype for all modules
+local modPrototype = { Debug = function(self, ...) addon:Debug(...) end }
+addon:SetDefaultModulePrototype(modPrototype)
+
+
+-- Db default settings
+addon.dbDefaults = {
+	realm = {
+		modules = {}
+	}
+}
 
 tinsert(addonTable, addon);
 _G[addonName] = addon
 
-addon.currentEncounter = nil;
-addon.currentZoneId = nil;
-addon.guildName = nil;
-addon.inspect = {};
 
 local function getDifficultyNameById(difficultyId)
 	if difficultyId == 7 or difficultyId == 17 then
@@ -46,14 +50,30 @@ function addon:UpdateMyGuildName()
 	end
 end
 
+function addon:UpdateCurrentZone()
+	local zoneId, _ = GetCurrentMapAreaID()
+	local zoneName = GetRealZoneText();
+	self.currentZone = {id = zoneId, name = zoneName};
+	
+	if not IsInInstance() then
+		self:UnsetCurrentEncounter();
+	end
+end
+
 function addon:SetCurrentEncounter(encounterId, encounterName, difficultyId, raidSize)
-	self.currentEncounter = {
-		id = encounterId, 
-		name = encounterName, 
-		difficultyId = difficultyId,
-		difficultyName = getDifficultyNameById(difficultyId),
-		raidSize = raidSize
-	}
+	
+	local difficultyName = getDifficultyNameById(difficultyId);
+	if difficultyName then
+		self.currentEncounter = {
+			zoneId = self.currentZone.id,
+			zoneName = self.currentZone.name,
+			id = encounterId, 
+			name = encounterName, 
+			difficultyId = difficultyId,
+			difficultyName = difficultyName,
+			raidSize = raidSize
+		}
+	end
 end
 
 function addon:UnsetCurrentEncounter()
@@ -61,7 +81,6 @@ function addon:UnsetCurrentEncounter()
 end
 
 function addon:IsInMyGuild(playerName)
-	if 1 then return true end
 	if self.guildName then
 		local guildName, _, _ = GetGuildInfo(playerName)
 		return guildName == self.guildName
@@ -102,7 +121,7 @@ function addon:PLAYER_GUILD_UPDATE(evt, unitId)
 end
 
 function addon:ENCOUNTER_START(evt, encounterId, encounterName, difficultyId, raidSize)
-	self:Debug("ENCOUNTER_START")
+	self:Debug("ENCOUNTER_START " .. encounterId)
 	self:SetCurrentEncounter(encounterId, encounterName, difficultyId, raidSize)
 end
 
@@ -115,6 +134,11 @@ function addon:ENCOUNTER_END(evt, encounterId, encounterName, difficultyId, raid
 	end
 end
 
+function addon:ZONE_CHANGED_NEW_AREA(evt)
+	self:Debug("ZONE_CHANGED_NEW_AREA");
+	self:UpdateCurrentZone();
+end
+
 function addon:EndSegment()
 	self:Debug("EndSegment")
 	
@@ -123,53 +147,47 @@ function addon:EndSegment()
 		return
 	end
 
-	local encounter = self.currentEncounter
+	local encounter = self.currentEncounter;
+	encounter.duration = Skada.last.time;
+
 	local players = self:GetGuildPlayersFromSet(Skada.last);
 	self:SetRoleForPlayers(players);
 	self.inspect:GetInspectDataForPlayers(players, function()
-		for i, player in ipairs(players) do
-			local name = player.name;
-			local damage = Skada:FormatNumber(player.damage);
-			local role = player.role;
-			local itemLevel = player.itemLevel and player.itemLevel or "N/A"
-			local specName = player.specName and player.specName or "N/A"
-			-- "(DAMAGE) Saniera - 20.1k (560 Shadow)"
-			self:Debug(format("(%s) %s - %s (%d %s)", role, name, damage, itemLevel, specName));
-		end
+		self.highscore:AddEncounterParsesForPlayers(encounter, players);
 	end)
 
-	--[[
-	self:Printf("%s (%s - %d) %dm", 
-		encounter.name, 
-		encounter.difficultyName and encounter.difficultyName or "Unknown",
-		encounter.difficultyId,
-		encounter.raidSize);
-	]]--
 	self:UnsetCurrentEncounter();
 end
 
-
 function addon:OnInitialize()
+	self.db = LibStub("AceDB-3.0"):New("GuildSkadaHighScoreDB", addon.dbDefaults)
 end
 
 function addon:OnEnable()
+	self.currentEncounter = nil;
+	self.currentZone = {};
+	self.guildName = nil;
+
 	self:RegisterEvent("ENCOUNTER_START")
 	self:RegisterEvent("ENCOUNTER_END")	
 	self:RegisterEvent("PLAYER_GUILD_UPDATE")
-	self:RegisterEvent("INSPECT_READY")
+	self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 
 	self:SecureHook(Skada, "EndSegment")
 
 	self:UpdateMyGuildName()
+	self:UpdateCurrentZone();
 end
 
 function addon:OnDisable()
-	self:UnRegisterEvent("ENCOUNTER_START")
-	self:UnRegisterEvent("ENCOUNTER_END")
-	self:UnRegisterEvent("PLAYER_GUILD_UPDATE")
-	self:UnRegisterEvent("INSPECT_READY")
+	self.currentEncounter = nil;
+	self.currentZone = {};
+	self.guildName = nil;
 
-	self:StopNotifyInspectTimer();
+	self:UnregisterEvent("ENCOUNTER_START")
+	self:UnregisterEvent("ENCOUNTER_END")
+	self:UnregisterEvent("PLAYER_GUILD_UPDATE")
+	self:UnregisterEvent("ZONE_CHANGED_NEW_AREA")
     
     self:UnHook(Skada, "EndSegment")
 end

@@ -1,7 +1,14 @@
 local addonName, addonTable = ...
 
+-- Global functions for faster access
+local tinsert = tinsert;
+local floor = floor;
+local wipe = wipe;
+
+-- Set up module
 local addon = addonTable[1];
-local inspect = addon.inspect;
+local inspect = addon:NewModule("inspect", "AceEvent-3.0", "AceTimer-3.0")
+addon.inspect = inspect;
 
 -- Constants
 local INSPECT_CACHE_TIMEOUT = 900;
@@ -10,10 +17,7 @@ local INVENTORY_SLOT_NAMES = {
 	"HandsSlot","WaistSlot","LegsSlot","FeetSlot","Finger0Slot","Finger1Slot",
 	"Trinket0Slot","Trinket1Slot","MainHandSlot","SecondaryHandSlot"
 }
-
-inspect.inspectQueue = {};
-inspect.notifyInspectTimer = nil;
-inspect.currentInspectPlayerId = nil;
+local NOOP = function() end
 
 local playerGUID = UnitGUID("player");
 local inspectCache = {};
@@ -65,12 +69,15 @@ local function getItemLevel(unitName)
 end
 
 local function hasPlayerInspectCache(playerId, ignoreExpired)
-	if not inspectCache[playerId] then
-		return false; -- No entry for player id
-	elseif not ignoreExpired and ((GetTime() - inspectCache[playerId].time) > INSPECT_CACHE_TIMEOUT) then
-		return false; -- Cache entry is too old
+	if inspectCache[playerId] and ignoreExpired then
+		return true -- We have a cache, might be expired
+	elseif inspectCache[playerId] and inspectCache[playerId].time then
+		local isExpired = (GetTime() - inspectCache[playerId].time) > INSPECT_CACHE_TIMEOUT
+		local hasAllAttributes = inspectCache[playerId].specName and inspectCache[playerId].itemLevel;
+
+		return (not isExpired and hasAllAttributes)
 	else
-		return true;
+		return false; -- No entry for player id
 	end 
 end
 
@@ -83,15 +90,15 @@ end
 
 function inspect:StartNotifyInspectTimer()
 	if not self.notifyInspectTimer then
-		self.notifyInspectTimer = addon:ScheduleRepeatingTimer(function()
-			self:NOTIFY_INSPECT_TIMER_DONE();
-		end, 1)
+		self.notifyInspectTimer = self:ScheduleRepeatingTimer(function()
+			self:NOTIFY_INSPECT_TIMER_DONE()
+		end, 1);
 	end
 end
 
 function inspect:StopNotifyInspectTimer()
 	if self.notifyInspectTimer then
-		addon:CancelTimer(self.notifyInspectTimer);
+		self:CancelTimer(self.notifyInspectTimer);
 		self.notifyInspectTimer = nil;
 	end
 end
@@ -108,7 +115,7 @@ function inspect:IsPlayerInInspectQueue(player)
 end
 
 function inspect:QueueInspect(player, callback)
-	addon:Debug("QueueNotifyInspect " .. player.name)
+	self:Debug("QueueNotifyInspect " .. player.name)
 
 	if not self.inspectQueue[player.id] then
 		self.inspectQueue[player.id] = {player = player, callbacks = {}};
@@ -138,6 +145,9 @@ function inspect:SetCachedInspectDataForPlayer(player)
 end
 
 function inspect:GetInspectDataForPlayer(player, callback)
+	-- Make sure we always have a callback
+	callback = callback and callback or NOOP;
+
 	if self:SetCachedInspectDataForPlayer(player) then
 		return callback()
 	elseif not CanInspect(player.name, false) then
@@ -162,8 +172,6 @@ function inspect:GetInspectDataForPlayers(players, callback)
 end
 
 function inspect:ResolveInspect(playerId, success)
-	addon:Debug("ResolveInspect " .. playerId .. " " .. (success and "success" or "fail"))
-
 	if not self.inspectQueue[playerId] then
 		return
 	end
@@ -171,6 +179,8 @@ function inspect:ResolveInspect(playerId, success)
 	local player = self.inspectQueue[playerId].player;
 	local callbacks = self.inspectQueue[playerId].callbacks;
 	self.inspectQueue[playerId] = nil;
+
+	self:Debug("ResolveInspect " .. player.name .. " " .. (success and "success" or "fail"))
 
 	if success then 
 		if not hasPlayerInspectCache(player.id) then
@@ -188,9 +198,20 @@ function inspect:ResolveInspect(playerId, success)
 	end
 end
 
-function inspect:NOTIFY_INSPECT_TIMER_DONE()
-	addon:Debug("NOTIFY_INSPECT_TIMER_DONE");
+function inspect:PreInspectGroup()
+	for i=1, GetNumGroupMembers() do
+		local playerName = GetRaidRosterInfo(i);		
+		if playerName then
+			local playerId = UnitGUID(playerName)
+			if playerId and not hasPlayerInspectCache(playerId) and CanInspect(playerName) then 
+				local player = {name=playerName, id = playerId}
+				self:QueueInspect(player, NOOP);
+			end
+		end
+	end
+end
 
+function inspect:NOTIFY_INSPECT_TIMER_DONE()
 	-- Timeout any current inspection
 	if self.currentInspectPlayerId then
 		self:ResolveInspect(self.currentInspectPlayerId, false);
@@ -211,4 +232,42 @@ function inspect:INSPECT_READY(evt, GUID)
 		self:ResolveInspect(self.currentInspectPlayerId, true)
 		self.currentInspectPlayerId = nil;
 	end
+end
+
+function inspect:GROUP_ROSTER_UPDATE(evt)
+	if not IsInGroup() then
+		self:Debug("Left group, wiping inspect cache");
+		wipe(inspectCache);
+		wipe(inspect.inspectQueue);
+		inspect.currentInspectPlayerId = nil;
+	end
+end
+
+function inspect:ZONE_CHANGED_NEW_AREA(evt)
+	if IsInInstance() and IsInRaid() then
+		-- We just zoned into an instance, try pre-inspecting the group
+		self:PreInspectGroup();
+	end
+end
+
+function inspect:OnEnable()
+	inspect.inspectQueue = {};
+	inspect.notifyInspectTimer = nil;
+	inspect.currentInspectPlayerId = nil;
+
+	self:RegisterEvent("INSPECT_READY");
+	self:RegisterEvent("GROUP_ROSTER_UPDATE");
+	self:RegisterEvent("ZONE_CHANGED_NEW_AREA");
+end
+
+function inspect:OnDisable()
+	self:UnregisterEvent("INSPECT_READY");
+	self:UnregisterEvent("GROUP_ROSTER_UPDATE");
+	self:UnregisterEvent("ZONE_CHANGED_NEW_AREA");
+	
+	self:StopNotifyInspectTimer();
+
+	wipe(inspectCache);
+	wipe(inspect.inspectQueue);
+	inspect.currentInspectPlayerId = nil;
 end

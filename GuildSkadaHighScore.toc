@@ -3,6 +3,7 @@
 ## Version: 0.01
 ## Title: Guild Skada High Score
 ## Notes: Ranking for dps/hps for raid bosses in a guild.
+## SavedVariables: GuildSkadaHighScoreDB
 ## Dependencies: Skada
 
 lib/lib.xml

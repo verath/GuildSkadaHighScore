@@ -22,6 +22,7 @@ addon.dbDefaults.realm.modules["highscore"] = {
 						["**"] = {
 							playerParses = {} -- List of objects "{playerInfo, role, dps, hps}"
 						},
+						["LFR"] = {},
 						["Normal"] = {},
 						["Heroic"] = {},
 						["Mythic"] = {}
@@ -46,6 +47,7 @@ function highscore:GetOrCreateEncounterTable(zoneId, zoneName, encounterId, enco
 		zone.encounters[encounterId] = {
 			encounterName = encounterName, 
 			difficulties = {
+				LFR = {playerParses = {}},
 				Normal = {playerParses = {}},
 				Heroic = {playerParses = {}},
 				Mythic = {playerParses = {}}
@@ -60,9 +62,11 @@ function highscore:GetOrCreateEncounterTable(zoneId, zoneName, encounterId, enco
 	end
 end
 
-function highscore:AddEncounterParseForPlayer(zoneId, zoneName, encounterId, encounterName, difficultyName, player)
+function highscore:AddEncounterParseForPlayer(zoneId, zoneName, encounterId, encounterName, difficultyName, duration, player)
 	local encounterTable = self:GetOrCreateEncounterTable(zoneId, 
 		zoneName, encounterId, encounterName, difficultyName);
+
+	self:Debug(format("AddEncounterParseForPlayer (%s, %s, %s, %s)", zoneName, encounterName, difficultyName, player.name));
 
 	if encounterTable then
 		local parse = {
@@ -73,7 +77,7 @@ function highscore:AddEncounterParseForPlayer(zoneId, zoneName, encounterId, enc
 			itemLevel = player.itemLevel,
 			damage = player.damage,
 			healing = player.healing,
-			duration = encounter.duration
+			duration = duration
 		}
 		tinsert(encounterTable.playerParses, parse);
 	end
@@ -85,12 +89,14 @@ function highscore:AddEncounterParsesForPlayers(encounter, players)
 	local encounterId = encounter.id;
 	local encounterName = encounter.name;
 	local difficultyName = encounter.difficultyName;
+	local duration = encounter.duration;
 
 	assert(zoneId and zoneId > 1)
 	assert(zoneName)
 	assert(encounterId)
 	assert(encounterName)
 	assert(difficultyName)
+	assert(duration)
 	assert(players)
 
 	if not tContains(trackedZoneIds, zoneId) then
@@ -99,8 +105,7 @@ function highscore:AddEncounterParsesForPlayers(encounter, players)
 	end
 
 	for _, player in ipairs(players) do
-		self:AddEncounterParseForPlayer(zoneId, zoneName, 
-			encounterId, encounterName, difficultyName, player)
+		self:AddEncounterParseForPlayer(zoneId, zoneName, encounterId, encounterName, difficultyName, duration, player)
 	end
 end
 

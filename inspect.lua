@@ -115,7 +115,7 @@ function inspect:IsPlayerInInspectQueue(player)
 end
 
 function inspect:QueueInspect(player, callback)
-	self:Debug("QueueNotifyInspect " .. player.name)
+	self:Debug("QueueInspect " .. player.name)
 
 	if not self.inspectQueue[player.id] then
 		self.inspectQueue[player.id] = {player = player, callbacks = {}};
@@ -200,11 +200,13 @@ end
 
 function inspect:PreInspectGroup()
 	for i=1, GetNumGroupMembers() do
-		local playerName = GetRaidRosterInfo(i);		
-		if playerName then
+
+		local playerName = GetRaidRosterInfo(i);
+		if playerName and addon:IsInMyGuild(playerName) then
+
 			local playerId = UnitGUID(playerName)
-			if playerId and not hasPlayerInspectCache(playerId) and CanInspect(playerName) then 
-				local player = {name=playerName, id = playerId}
+			if playerId and playerId ~= playerGUID and not hasPlayerInspectCache(playerId) then 
+				local player = {name=playerName, id=playerId}
 				self:QueueInspect(player, NOOP);
 			end
 		end

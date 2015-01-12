@@ -61,8 +61,9 @@ function addon:UpdateCurrentZone()
 end
 
 function addon:SetCurrentEncounter(encounterId, encounterName, difficultyId, raidSize)
-	
 	local difficultyName = getDifficultyNameById(difficultyId);
+
+	self:Debug("SetCurrentEncounter " .. encounterName .. " " .. difficultyName)
 	if difficultyName then
 		self.currentEncounter = {
 			zoneId = self.currentZone.id,
@@ -160,7 +161,7 @@ function addon:EndSegment()
 end
 
 function addon:OnInitialize()
-	self.db = LibStub("AceDB-3.0"):New("GuildSkadaHighScoreDB", addon.dbDefaults)
+	self.db = LibStub("AceDB-3.0"):New("GuildSkadaHighScoreDB", addon.dbDefaults, true)
 end
 
 function addon:OnEnable()

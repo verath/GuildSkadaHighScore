@@ -14,8 +14,15 @@ addon:SetDefaultModulePrototype(modPrototype)
 addon.dbDefaults = {
 	realm = {
 		modules = {}
+	},
+	global = {
+		dbVersion = 1
 	}
 }
+
+-- The current db version. Clear (migrate?) the database if 
+-- version of database doesn't match this version.
+addon.dbVersion = 1
 
 tinsert(addonTable, addon);
 _G[addonName] = addon
@@ -143,6 +150,11 @@ end
 function addon:EndSegment()
 	self:Debug("EndSegment")
 	
+	if not self.guildName then
+		self:Debug("Not in a guild");
+		return;
+	end
+
 	if not self.currentEncounter or not Skada.last.gotboss then
 		self:Debug("Not a boss")
 		return
@@ -154,7 +166,7 @@ function addon:EndSegment()
 	local players = self:GetGuildPlayersFromSet(Skada.last);
 	self:SetRoleForPlayers(players);
 	self.inspect:GetInspectDataForPlayers(players, function()
-		self.highscore:AddEncounterParsesForPlayers(encounter, players);
+		self.highscore:AddEncounterParsesForPlayers(self.guildName, encounter, players);
 	end)
 
 	self:UnsetCurrentEncounter();
@@ -162,6 +174,13 @@ end
 
 function addon:OnInitialize()
 	self.db = LibStub("AceDB-3.0"):New("GuildSkadaHighScoreDB", addon.dbDefaults, true)
+	if self.db.global.dbVersion ~= self.dbVersion then
+		self:Debug(format("Found not matching db versions: db=%d, addon=%d", 
+			self.db.global.dbVersion, self.dbVersion));
+		self:Debug("Resetting db");
+		self.db:ResetDB();
+		self.db.global.dbVersion = self.dbVersion;
+	end
 end
 
 function addon:OnEnable()

@@ -61,7 +61,7 @@ local function getOrCreateEncounterTable(db, guildName, zoneId, zoneName, encoun
 	end
 end
 
-local function addEncounterParseForPlayer(encounterTable, duration, player)
+local function addEncounterParseForPlayer(encounterTable, startTime, duration, player)
 	local parse = {
 		playerId = player.id,
 		playerName = player.name,
@@ -70,7 +70,8 @@ local function addEncounterParseForPlayer(encounterTable, duration, player)
 		itemLevel = player.itemLevel,
 		damage = player.damage,
 		healing = player.healing,
-		duration = duration
+		duration = duration,
+		startTime = startTime
 	}
 	tinsert(encounterTable.playerParses, parse);
 end
@@ -82,6 +83,7 @@ function highscore:AddEncounterParsesForPlayers(guildName, encounter, players)
 	local encounterId = encounter.id;
 	local encounterName = encounter.name;
 	local difficultyName = encounter.difficultyName;
+	local startTime = encounter.startTime;
 	local duration = encounter.duration;
 
 	assert(guildName)
@@ -90,6 +92,7 @@ function highscore:AddEncounterParsesForPlayers(guildName, encounter, players)
 	assert(encounterId)
 	assert(encounterName)
 	assert(difficultyName)
+	assert(startTime)
 	assert(duration)
 	assert(players)
 
@@ -107,7 +110,7 @@ function highscore:AddEncounterParsesForPlayers(guildName, encounter, players)
 
 	for _, player in ipairs(players) do
 		self:Debug(format("addEncounterParseForPlayer: %s", player.name));
-		addEncounterParseForPlayer(encounterTable, duration, player)
+		addEncounterParseForPlayer(encounterTable, startTime, duration, player)
 	end
 end
 

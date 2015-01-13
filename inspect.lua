@@ -90,6 +90,8 @@ end
 
 function inspect:StartNotifyInspectTimer()
 	if not self.notifyInspectTimer then
+		self:Debug("Starting notifyInspectTimer");
+
 		self.notifyInspectTimer = self:ScheduleRepeatingTimer(function()
 			self:NOTIFY_INSPECT_TIMER_DONE()
 		end, 1);
@@ -98,24 +100,15 @@ end
 
 function inspect:StopNotifyInspectTimer()
 	if self.notifyInspectTimer then
+		self:Debug("Stopping notifyInspectTimer");
+
 		self:CancelTimer(self.notifyInspectTimer);
 		self.notifyInspectTimer = nil;
 	end
 end
 
-function inspect:IsPlayerInInspectQueue(player)
-	local playerInQueue = false
-	for _, p in ipairs(self.notifyInspectQueue) do
-		if p.name == player.name then
-			playerInQueue = true;
-			break;
-		end
-	end
-	return playerInQueue;
-end
-
 function inspect:QueueInspect(player, callback)
-	self:Debug("QueueInspect " .. player.name)
+	self:Debug("QueueInspect", player.name)
 
 	if not self.inspectQueue[player.id] then
 		self.inspectQueue[player.id] = {player = player, callbacks = {}};
@@ -180,7 +173,7 @@ function inspect:ResolveInspect(playerId, success)
 	local callbacks = self.inspectQueue[playerId].callbacks;
 	self.inspectQueue[playerId] = nil;
 
-	self:Debug("ResolveInspect " .. player.name .. " " .. (success and "success" or "fail"))
+	self:Debug("ResolveInspect", player.name, (success and "success" or "fail"))
 
 	if success then 
 		if not hasPlayerInspectCache(player.id) then

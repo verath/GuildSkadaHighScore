@@ -30,7 +30,7 @@ addon.dbVersion = 2
 
 -- Constants
 DEBUG_PRINT = true;
-DEBUG_LOG = true;
+DEBUG_LOG = false;
 MAX_NUM_DEBUG_LOG_ENTRIES = 300;
 
 local function getDifficultyNameById(difficultyId)
@@ -209,10 +209,14 @@ function addon:OnInitialize()
 	end
 
 	-- Purge old logs
-	local numLogsToPurge = (#self.db.global.debugLog - MAX_NUM_DEBUG_LOG_ENTRIES);
-	while numLogsToPurge >= 0 do
-		tremove(self.db.global.debugLog, 1)
-		numLogsToPurge = numLogsToPurge - 1;
+	if DEBUG_LOG then
+		local numLogsToPurge = (#self.db.global.debugLog - MAX_NUM_DEBUG_LOG_ENTRIES);
+		while numLogsToPurge >= 0 do
+			tremove(self.db.global.debugLog, 1)
+			numLogsToPurge = numLogsToPurge - 1;
+		end
+	else
+		wipe(self.db.global.debugLog);
 	end
 end
 
@@ -228,7 +232,7 @@ function addon:OnEnable()
 
 	self:SecureHook(Skada, "EndSegment")
 
-	self:UpdateMyGuildName()
+	self:UpdateMyGuildName();
 	self:UpdateCurrentZone();
 end
 

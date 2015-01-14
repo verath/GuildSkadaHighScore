@@ -2,4 +2,5 @@
     <Script file="main.lua"/>
     <Script file="inspect.lua"/>
     <Script file="highscore.lua"/>
+    <Script file="gui.lua"/>
 </Ui>

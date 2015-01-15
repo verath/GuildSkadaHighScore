@@ -136,6 +136,12 @@ function addon:SetRoleForPlayers(players)
 	end
 end
 
+function addon:SetClassForPlayers(players)
+	for _, player in ipairs(players) do
+		player.class = UnitClass(player.name);
+	end
+end
+
 function addon:PLAYER_GUILD_UPDATE(evt, unitId)
 	if unitId == "player" then
 		self:UpdateMyGuildName()
@@ -189,6 +195,7 @@ function addon:EndSegment()
 
 	local players = self:GetGuildPlayersFromSet(skadaSet);
 	self:SetRoleForPlayers(players);
+	self:SetClassForPlayers(players);
 	self.inspect:GetInspectDataForPlayers(players, function()
 		self.highscore:AddEncounterParsesForPlayers(self.guildName, encounter, players);
 	end)

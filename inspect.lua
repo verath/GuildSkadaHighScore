@@ -22,6 +22,13 @@ local NOOP = function() end
 local playerGUID = UnitGUID("player");
 local inspectCache = {};
 
+
+
+local function isInPVEInstance()
+	local isInstance, instanceType = IsInInstance();
+	return inInstance and (instanceType == "party" or instanceType == "raid")
+end
+
 local function getTalentSpec(unitName)
 	if unitName == "player" then
 		local spec = GetSpecialization();
@@ -239,7 +246,7 @@ function inspect:GROUP_ROSTER_UPDATE(evt)
 end
 
 function inspect:ZONE_CHANGED_NEW_AREA(evt)
-	if IsInInstance() and IsInRaid() then
+	if isInPVEInstance() then
 		-- We just zoned into an instance, try pre-inspecting the group
 		self:PreInspectGroup();
 	end

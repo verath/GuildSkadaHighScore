@@ -6,5 +6,5 @@
 ## SavedVariables: GuildSkadaHighScoreDB
 ## Dependencies: Skada
 
-lib/lib-include.xml
-src/src-include.xml
+lib\lib_include.xml
+src\src_include.xml

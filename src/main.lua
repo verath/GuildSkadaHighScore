@@ -256,8 +256,8 @@ function addon:OnDisable()
 	self:UnregisterEvent("ENCOUNTER_END")
 	self:UnregisterEvent("PLAYER_GUILD_UPDATE")
 	self:UnregisterEvent("ZONE_CHANGED_NEW_AREA")
-    
-    self:UnHook(Skada, "EndSegment");
+	
+	self:UnHook(Skada, "EndSegment");
 
-    self:UnregisterChatCommand("gshs");
+	self:UnregisterChatCommand("gshs");
 end

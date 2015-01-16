@@ -1,6 +1,6 @@
 ## Interface: 60000
 ## Author: Verath (Peter Eliasson) 
-## Version: 0.01
+## Version: 0.0.2
 ## Title: Guild Skada High Score
 ## Notes: Ranking for dps/hps for raid bosses in a guild.
 ## SavedVariables: GuildSkadaHighScoreDB

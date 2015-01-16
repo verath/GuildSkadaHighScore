@@ -2,9 +2,9 @@
 ## Author: Verath (Peter Eliasson) 
 ## Version: 0.0.2
 ## Title: Guild Skada High Score
-## Notes: Ranking for dps/hps for raid bosses in a guild.
+## Notes: Tracking and ranking of dps/hps in a guild.
 ## SavedVariables: GuildSkadaHighScoreDB
 ## Dependencies: Skada
 
-lib/lib.xml
-main.xml
+lib/lib-include.xml
+src/src-include.xml

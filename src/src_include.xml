@@ -3,4 +3,5 @@
 	<Script file="inspect.lua"/>
 	<Script file="highscore.lua"/>
 	<Script file="gui.lua"/>
+	<Include file="parse_modules\parse_modules_include.xml"/>
 </Ui>

@@ -4,7 +4,7 @@ local tinsert = tinsert;
 local tremove = tremove;
 
 -- Create ACE3 addon
-local addon = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0", "AceEvent-3.0", "AceHook-3.0")
+local addon = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0", "AceEvent-3.0")
 
 tinsert(addonTable, addon);
 _G[addonName] = addon
@@ -130,16 +130,33 @@ function addon:GetGuildPlayersFromSet(skadaSet)
 	return players
 end
 
-function addon:SetRoleForPlayers(players)
-	for _, player in ipairs(players) do
-		player.role = UnitGroupRolesAssigned(player.name);
-	end
-end
+function addon:OnEncounterEndSuccess()
+	self:Debug("OnEncounterEndSuccess")
 
-function addon:SetClassForPlayers(players)
-	for _, player in ipairs(players) do
-		player.class = UnitClass(player.name);
+	local guildName = self.guildName;
+	if not guildName then
+		self:Debug("Not in a guild");
+		return;
 	end
+
+	local encounter = self.currentEncounter;
+	if not encounter then
+		self:Debug("No current encounter");
+		return
+	end
+
+	local pmc = self.parseModulesCore;
+	pmc:GetParsesForEncounter(encounter, function(success, startTime, duration, players)
+		if not success then return end;
+
+		encounter.startTime = startTime;
+		encounter.duration = duration;
+		self.inspect:GetInspectDataForPlayers(players, function()
+			self.highscore:AddEncounterParsesForPlayers(guildName, encounter, players);
+		end)
+	end)
+
+	self:UnsetCurrentEncounter();
 end
 
 function addon:PLAYER_GUILD_UPDATE(evt, unitId)
@@ -156,51 +173,15 @@ end
 function addon:ENCOUNTER_END(evt, encounterId, encounterName, difficultyId, raidSize, endStatus)
 	self:Debug("ENCOUNTER_END", encounterId, encounterName, difficultyId, raidSize, endStatus)
 	if endStatus == 1 then -- Success
-		self:SetCurrentEncounter(encounterId, encounterName, difficultyId, raidSize)
+		self:SetCurrentEncounter(encounterId, encounterName, difficultyId, raidSize);
+		self:OnEncounterEndSuccess();
 	else
-		self:UnsetCurrentEncounter()
+		self:UnsetCurrentEncounter();
 	end
 end
 
 function addon:ZONE_CHANGED_NEW_AREA(evt)
 	self:UpdateCurrentZone();
-end
-
-function addon:EndSegment()
-	self:Debug("EndSegment")
-
-	-- Find the skada set matching the encounter
-	-- Looking only at the lastest set should make sense,
-	-- as that set should be the boss segment we just ended.
-	local _, skadaSet = next(Skada:GetSets());
-	local encounter = self.currentEncounter;
-
-	if not self.guildName then
-		self:Debug("Not in a guild");
-		return;
-	end
-
-	if not encounter then
-		self:Debug("No current encounter");
-		return
-	end
-
-	if not skadaSet or not skadaSet.gotboss or skadaSet.mobname ~= encounter.name then
-		self:Debug("No Skada set found for boss");
-		return;
-	end
-
-	encounter.duration = skadaSet.time;
-	encounter.startTime = skadaSet.starttime;
-
-	local players = self:GetGuildPlayersFromSet(skadaSet);
-	self:SetRoleForPlayers(players);
-	self:SetClassForPlayers(players);
-	self.inspect:GetInspectDataForPlayers(players, function()
-		self.highscore:AddEncounterParsesForPlayers(self.guildName, encounter, players);
-	end)
-
-	self:UnsetCurrentEncounter();
 end
 
 function addon:OnInitialize()
@@ -237,8 +218,6 @@ function addon:OnEnable()
 	self:RegisterEvent("PLAYER_GUILD_UPDATE")
 	self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 
-	self:SecureHook(Skada, "EndSegment")
-
 	self:RegisterChatCommand("gshs", function()
 		self.gui:ShowMainFrame();
 	end)
@@ -257,7 +236,5 @@ function addon:OnDisable()
 	self:UnregisterEvent("PLAYER_GUILD_UPDATE")
 	self:UnregisterEvent("ZONE_CHANGED_NEW_AREA")
 	
-	self:UnHook(Skada, "EndSegment");
-
 	self:UnregisterChatCommand("gshs");
 end

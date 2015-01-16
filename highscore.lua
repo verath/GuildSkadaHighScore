@@ -18,25 +18,24 @@ addon.dbDefaults.realm.modules["highscore"] = {
 		["*"] = { -- Guild Name
 			["zones"] = {
 				["*"] = { -- zoneId
-					encounters = {
-						["*"] = { -- encounterId
-							difficulties = {
-								-- playerParses is a list of objects: 
-								--[[
-									{
-										playerId 	 = "",
-										role 		 = "",
-										specName 	 = "",
-										itemLevel 	 = 0,
-										damage 		 = 0,
-										healing 	 = 0,
-										groupParseId = ""
-									}
-								--]]
-								["LFR"] 	= {playerParses = {}},
-								["Normal"] 	= {playerParses = {}},
-								["Heroic"] 	= {playerParses = {}},
-								["Mythic"] 	= {playerParses = {}}
+					["difficulties"] = {
+						["*"] = { -- difficultyId
+							["encounters"] = {
+								["*"] = { -- encounterId
+									--[[
+										playerParses is a list of objects: 
+										{
+											playerId 	 = "",
+											role 		 = "",
+											specName 	 = "",
+											itemLevel 	 = 0,
+											damage 		 = 0,
+											healing 	 = 0,
+											groupParseId = ""
+										}
+									--]]
+									playerParses = {}
+								}
 							}
 						}
 					}
@@ -47,6 +46,11 @@ addon.dbDefaults.realm.modules["highscore"] = {
 	["zones"] = {
 		["*"] = { -- zoneId
 			zoneName = nil
+		}
+	},
+	["difficulties"] = {
+		["*"] = { -- difficultyId
+			difficultyName = nil
 		}
 	},
 	["encounters"] = {
@@ -70,72 +74,13 @@ addon.dbDefaults.realm.modules["highscore"] = {
 	}
 }
 
-addon.dbVersion = addon.dbVersion + 3
+addon.dbVersion = addon.dbVersion + 4
 
 -- Constants
 local TRACKED_ZONE_IDS = {
 	994 -- Highmaul
 }
 
-
-local function generateRandomKey()
-	local r1 = random(0, 1000);
-	local r2 = random(0, 1000);
-	local r3 = random(0, 1000);
-	-- 1000^3 = 1´000´000´000, should be enough for now...
-	return format("%x-%x-%x", r1, r2, r3);
-end
-
-local function addGroupParse(db, startTime, duration)
-	-- Find a new unique key for the raid parse
-	local key = generateRandomKey();
-	while db.groupParses[key] do
-		key = generateRandomKey();
-	end
-
-	db.groupParses[key] = {
-		startTime 	= startTime,
-		duration 	= duration
-	};
-
-	return key
-end
-
-local function addZone(db, zoneId, zoneName)
-	db.zones[zoneId].zoneName = zoneName;
-end
-
-local function addEncounter(db, encounterId, encounterName)
-	db.encounters[encounterId].encounterName = encounterName;
-end
-
-local function addPlayer(db, playerId, playerName, playerClass)
-	db.players[playerId].name = playerName;
-	db.players[playerId].class = playerClass;
-end
-
-local function getParsesTable(db, guildName, zoneId, encounterId, difficultyName)
-	local encounterTable = db.guilds[guildName].zones[zoneId].encounters[encounterId];
-	
-	if not encounterTable.difficulties[difficultyName] then
-		return nil
-	else
-		return encounterTable.difficulties[difficultyName].playerParses
-	end
-end
-
-local function addEncounterParseForPlayer(parsesTable, player, groupParseId)
-	local parse = {
-		playerId 	 = player.id,
-		role 		 = player.role,
-		specName 	 = player.specName,
-		itemLevel 	 = player.itemLevel,
-		damage 		 = player.damage,
-		healing 	 = player.healing,
-		groupParseId = groupParseId
-	}
-	tinsert(parsesTable, parse);
-end
 
 -- Function for convering a database representation of 
 -- a parse to a parse that can be returned to users.
@@ -167,20 +112,84 @@ local function getReturnableParse(db, parse)
 	return parseCopy;
 end
 
+local function generateRandomKey()
+	local r1 = random(0, 1000);
+	local r2 = random(0, 1000);
+	local r3 = random(0, 1000);
+	-- 1000^3 = 1´000´000´000, should be enough for now...
+	return format("%x-%x-%x", r1, r2, r3);
+end
+
+local function addGroupParse(db, startTime, duration)
+	-- Find a new unique key for the raid parse
+	local key = generateRandomKey();
+	while db.groupParses[key] do
+		key = generateRandomKey();
+	end
+
+	db.groupParses[key] = {
+		startTime 	= startTime,
+		duration 	= duration
+	};
+
+	return key
+end
+
+local function addZone(db, zoneId, zoneName)
+	db.zones[zoneId].zoneName = zoneName;
+end
+
+local function addDifficulty(db, difficultyId, difficultyName)
+	db.difficulties[difficultyId].difficultyName = difficultyName;
+end
+
+local function addEncounter(db, encounterId, encounterName)
+	db.encounters[encounterId].encounterName = encounterName;
+end
+
+local function addPlayer(db, playerId, playerName, playerClass)
+	db.players[playerId].name = playerName;
+	db.players[playerId].class = playerClass;
+end
+
+local function getParsesTable(db, guildName, zoneId, difficultyId, encounterId)
+	return db
+		.guilds[guildName]
+		.zones[zoneId]
+		.difficulties[difficultyId]
+		.encounters[encounterId]
+		.playerParses;
+end
+
+local function addEncounterParseForPlayer(parsesTable, player, groupParseId)
+	local parse = {
+		playerId 	 = player.id,
+		role 		 = player.role,
+		specName 	 = player.specName,
+		itemLevel 	 = player.itemLevel,
+		damage 		 = player.damage,
+		healing 	 = player.healing,
+		groupParseId = groupParseId
+	}
+	tinsert(parsesTable, parse);
+end
+
 function highscore:AddEncounterParsesForPlayers(guildName, encounter, players)
 	local zoneId = encounter.zoneId;
 	local zoneName = encounter.zoneName;
 	local encounterId = encounter.id;
 	local encounterName = encounter.name;
+	local difficultyId = encounter.difficultyId;
 	local difficultyName = encounter.difficultyName;
 	local startTime = encounter.startTime;
 	local duration = encounter.duration;
 
 	assert(guildName)
-	assert(zoneId and zoneId > 1)
+	assert(zoneId)
 	assert(zoneName)
 	assert(encounterId)
 	assert(encounterName)
+	assert(difficultyId)
 	assert(difficultyName)
 	assert(startTime)
 	assert(duration)
@@ -191,18 +200,15 @@ function highscore:AddEncounterParsesForPlayers(guildName, encounter, players)
 		return
 	end
 
-	-- Add zone and encounter info
+	-- Add zone, difficulty and encounter info
 	addZone(self.db, zoneId, zoneName);
+	addDifficulty(self.db, difficultyId, difficultyName);
 	addEncounter(self.db, encounterId, encounterName);
 
 	-- Add a group parse entry, holding data shared between all players
 	local groupParseId = addGroupParse(self.db, startTime, duration);
 
-	local parsesTable = getParsesTable(self.db, guildName, zoneId, encounterId, difficultyName);
-	if not parsesTable then
-		self:Debug("AddEncounterParsesForPlayers: Could not get parsesTable")
-		return
-	end
+	local parsesTable = getParsesTable(self.db, guildName, zoneId, difficultyId, encounterId);
 
 	for _, player in ipairs(players) do
 		self:Debug(format("addEncounterParseForPlayer: %s", player.name));
@@ -213,9 +219,10 @@ function highscore:AddEncounterParsesForPlayers(guildName, encounter, players)
 
 end
 
-function highscore:GetParses(guildName, zoneId, encounterId, difficultyName, role, sortBy)
+-- Returns (array of parses, numParses)
+function highscore:GetParses(guildName, zoneId, difficultyId, encounterId, role, sortBy)
 	if (role ~= "TANK" and role ~= "HEALER" and role ~= "DAMAGER") then
-		return {};
+		return {}, 0;
 	end
 
 	if not sortBy then
@@ -226,54 +233,87 @@ function highscore:GetParses(guildName, zoneId, encounterId, difficultyName, rol
 		end
 	end
 
-	local parsesTable = getParsesTable(self.db, guildName, zoneId, encounterId, difficultyName);
-	parsesTable = parsesTable or {};
+	local parsesTable = getParsesTable(self.db, guildName, zoneId, difficultyId, encounterId);
 
 	-- Get a *copy* of all parses for the specified role
 	local parses = {};
+	local numParses = 0;
 	for _, parse in ipairs(parsesTable) do
 		if parse.role == role then
 			local parseCopy = getReturnableParse(self.db, parse);
 			tinsert(parses, parseCopy);
+			numParses = numParses + 1;
 		end
 	end
 
 	sort(parses, function(a, b)
 		return a[sortBy] > b[sortBy];
 	end)
-	return parses;
+	return parses, numParses;
 end
 
--- Returns a list of encounters in the zone for the guild that 
--- the guild has parses for. The returned value is a list of
--- {encounterId, encounterName}.
-function highscore:GetEncounters(guildName, zoneId)
-	local encounters = {};
-	local encountersTable = self.db.guilds[guildName].zones[zoneId].encounters;
-	for encounterId, _ in pairs(encountersTable) do
-		local encounterName = self.db.encounters[encounterId].encounterName;
-		tinsert(encounters, {encounterId, encounterName});
+-- Returns (array of {encounterId => encounterName}, numEncounters)
+function highscore:GetEncounters(guildName, zoneId, difficultyId)
+	if not guildName or not zoneId or not difficultyId then
+		return {}, 0;
 	end
-	return encounters;
+
+	local encounters = {};
+	local numEncounters = 0;
+	local difficultiesTable = self.db.guilds[guildName].zones[zoneId].difficulties;
+
+	for encounterId, _ in pairs(difficultiesTable[difficultyId].encounters) do
+		local encounterName = self.db.encounters[encounterId].encounterName;
+		encounters[encounterId] = encounterName;
+		numEncounters = numEncounters + 1;
+	end
+	return encounters, numEncounters;
 end
 
--- Returns a list of zones that the guild has encounters for. 
--- The returned value is a list of {zoneId, zoneName}.
+-- Returns (array of {difficultyId => difficultyName}, numDifficulties)
+function highscore:GetDifficulties(guildName, zoneId)
+	if not guildName or not zoneId then
+		return {}, 0;
+	end
+
+	local difficulties = {};
+	local numDifficulties = 0;
+	local difficultiesTable = self.db.guilds[guildName].zones[zoneId].difficulties;
+
+	for difficultyId, _ in pairs(difficultiesTable) do
+		local difficultyName = self.db.difficulties[difficultyId].difficultyName;
+		difficulties[difficultyId] = difficultyName;
+		numDifficulties = numDifficulties + 1;
+	end
+	return difficulties, numDifficulties;
+end
+
+-- Returns (array of {zoneId => zoneName}, numZones)
 function highscore:GetZones(guildName)
+	if not guildName then
+		return {}, 0;
+	end
+
 	local zones = {};
+	local numZones = 0;
 	for zoneId, _ in pairs(self.db.guilds[guildName].zones) do
 		local zoneName = self.db.zones[zoneId].zoneName;
-		tinsert(zones, {zoneId, zoneName});
+		zones[zoneId] = zoneName;
+		numZones = numZones + 1;
 	end
-	return zones;
+	return zones, numZones;
 end
 
-function highscore:GetGuildNames()
+-- Returns (array of {guildId => guildName}, numGuilds)
+function highscore:GetGuilds()
 	local guildNames = {};
+	local numGuilds = 0;
 	for guildName, _ in pairs(self.db.guilds) do
-		tinsert(guildNames, guildName);
+		-- Actually guildId == guildName
+		guildNames[guildName] = guildName;
+		numGuilds = numGuilds + 1;
 	end
-	return guildNames;
+	return guildNames, numGuilds;
 end
 
 

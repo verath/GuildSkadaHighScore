@@ -239,6 +239,10 @@ function addon:OnEnable()
 
 	self:SecureHook(Skada, "EndSegment")
 
+	self:RegisterChatCommand("gshs", function()
+		self.gui:ShowMainFrame();
+	end)
+
 	self:UpdateMyGuildName();
 	self:UpdateCurrentZone();
 end
@@ -253,5 +257,7 @@ function addon:OnDisable()
 	self:UnregisterEvent("PLAYER_GUILD_UPDATE")
 	self:UnregisterEvent("ZONE_CHANGED_NEW_AREA")
     
-    self:UnHook(Skada, "EndSegment")
+    self:UnHook(Skada, "EndSegment");
+
+    self:UnregisterChatCommand("gshs");
 end

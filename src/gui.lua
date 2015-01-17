@@ -13,44 +13,56 @@ addon.gui = gui;
 local AceGUI = LibStub("AceGUI-3.0");
 
 
+local classIdToClassName = {};
+FillLocalizedClassList(classIdToClassName);
+
 function gui:CreateHighScoreParseEntry(parse, role, rank)
 	local entryWidget = AceGUI:Create("SimpleGroup");
 	entryWidget:SetFullWidth(true);
 	entryWidget:SetLayout("Flow");
+	entryWidget:SetHeight(30);
 	
+	local classId = parse.class;
+	local classColor = RAID_CLASS_COLORS[classId];
+	local className = classIdToClassName[classId];
+
+	local relativeWidth = floor((1/6)*100)/100;
+
 	local rankLabel = AceGUI:Create("Label");
 	rankLabel:SetText(rank);
-	rankLabel:SetRelativeWidth(0.14);
+	rankLabel:SetFontObject(GameFontHighlightLarge);
+	rankLabel:SetRelativeWidth(relativeWidth);
 	
 	local dpsHpsLabel = AceGUI:Create("Label");
 	local dpsHps = Skada:FormatNumber((role == "HEALER") and parse.hps or parse.dps);
 	dpsHpsLabel:SetText(dpsHps);
-	dpsHpsLabel:SetRelativeWidth(0.14);
+	dpsHpsLabel:SetFontObject(GameFontHighlightLarge);
+	dpsHpsLabel:SetRelativeWidth(relativeWidth);
 	
 	local nameLabel = AceGUI:Create("Label");
 	nameLabel:SetText(parse.name);
-	nameLabel:SetRelativeWidth(0.14);
-	
-	local classLabel = AceGUI:Create("Label");
-	classLabel:SetText(parse.class);
-	classLabel:SetRelativeWidth(0.14);
-	
+	nameLabel:SetColor(classColor.r, classColor.g, classColor.b);
+	nameLabel:SetFontObject(GameFontHighlightLarge);
+	nameLabel:SetRelativeWidth(relativeWidth);
+
 	local specLabel = AceGUI:Create("Label");
 	specLabel:SetText(parse.specName or "");
-	specLabel:SetRelativeWidth(0.14);
+	specLabel:SetFontObject(GameFontHighlightLarge);
+	specLabel:SetRelativeWidth(relativeWidth);
 	
 	local ilvlLabel = AceGUI:Create("Label");
 	ilvlLabel:SetText(parse.itemLevel or "");
-	ilvlLabel:SetRelativeWidth(0.14);
+	ilvlLabel:SetFontObject(GameFontHighlightLarge);
+	ilvlLabel:SetRelativeWidth(relativeWidth);
 
 	local dateLabel = AceGUI:Create("Label");
 	dateLabel:SetText(date("%m/%d/%y", parse.startTime));
-	dateLabel:SetRelativeWidth(0.14);
+	dateLabel:SetFontObject(GameFontHighlightLarge);
+	dateLabel:SetRelativeWidth(relativeWidth);
 	
 	entryWidget:AddChild(rankLabel);
 	entryWidget:AddChild(dpsHpsLabel);
 	entryWidget:AddChild(nameLabel);
-	entryWidget:AddChild(classLabel);
 	entryWidget:AddChild(specLabel);
 	entryWidget:AddChild(ilvlLabel);
 	entryWidget:AddChild(dateLabel);
@@ -130,6 +142,10 @@ function gui:CreateHighScoreScrollFrame()
 	scrollFrame:SetFullWidth(true);
 	scrollFrame:SetFullHeight(true);
 
+	self.highScoreParsesScrollFrame = scrollFrame;
+
+	local relativeWidth = floor((1/6)*100)/100;
+
 	-- Header:
 	-- Rank | DPS/HPS | Name | Class | Spec | Item Level | Date
 	local headerContainer = AceGUI:Create("SimpleGroup");
@@ -138,30 +154,37 @@ function gui:CreateHighScoreScrollFrame()
 	
 	local rankLabel = AceGUI:Create("Label");
 	rankLabel:SetText("Rank");
-	rankLabel:SetRelativeWidth(0.14);
+	rankLabel:SetFontObject(GameFontHighlightLarge);
+	rankLabel:SetRelativeWidth(relativeWidth);
+	
 	local dpsHpsLabel = AceGUI:Create("Label");
 	dpsHpsLabel:SetText("DPS/HPS");
-	dpsHpsLabel:SetRelativeWidth(0.14);
+	dpsHpsLabel:SetFontObject(GameFontHighlightLarge);
+	dpsHpsLabel:SetRelativeWidth(relativeWidth);
+	
 	local nameLabel = AceGUI:Create("Label");
 	nameLabel:SetText("Name");
-	nameLabel:SetRelativeWidth(0.14);
-	local classLabel = AceGUI:Create("Label");
-	classLabel:SetText("Class");
-	classLabel:SetRelativeWidth(0.14);
+	nameLabel:SetFontObject(GameFontHighlightLarge);
+	nameLabel:SetRelativeWidth(relativeWidth);
+	
 	local specLabel = AceGUI:Create("Label");
 	specLabel:SetText("Spec");
-	specLabel:SetRelativeWidth(0.14);
+	specLabel:SetFontObject(GameFontHighlightLarge);
+	specLabel:SetRelativeWidth(relativeWidth);
+	
 	local ilvlLabel = AceGUI:Create("Label");
 	ilvlLabel:SetText("Item Level");
-	ilvlLabel:SetRelativeWidth(0.14);
+	ilvlLabel:SetFontObject(GameFontHighlightLarge);
+	ilvlLabel:SetRelativeWidth(relativeWidth);
+	
 	local dateLabel = AceGUI:Create("Label");
 	dateLabel:SetText("Date");
-	dateLabel:SetRelativeWidth(0.14);
+	dateLabel:SetFontObject(GameFontHighlightLarge);
+	dateLabel:SetRelativeWidth(relativeWidth);
 	
 	headerContainer:AddChild(rankLabel);
 	headerContainer:AddChild(dpsHpsLabel);
 	headerContainer:AddChild(nameLabel);
-	headerContainer:AddChild(classLabel);
 	headerContainer:AddChild(specLabel);
 	headerContainer:AddChild(ilvlLabel);
 	headerContainer:AddChild(dateLabel);
@@ -228,16 +251,23 @@ function gui:DisplayParses()
 	local roleId = self.selectedRole;
 	
 	local parsesContainer = self.highScoreParsesContainer;
+	local scrollFrame = self.highScoreParsesScrollFrame;
 	parsesContainer:ReleaseChildren();
 
 	if guildName and zoneId and difficultyId and encounter and roleId then
 		local parses, numParses = addon.highscore:GetParses(guildName, 
 			zoneId, difficultyId, encounter, roleId);
 		if numParses > 0 then
+			parsesContainer:PauseLayout();
+			scrollFrame:PauseLayout();
 			for rank, parse in ipairs(parses) do
 				local entryWidget = self:CreateHighScoreParseEntry(parse, roleId, rank);
 				parsesContainer:AddChild(entryWidget);
 			end
+			parsesContainer:ResumeLayout();
+			parsesContainer:DoLayout();
+			scrollFrame:ResumeLayout();
+			scrollFrame:DoLayout();
 			return;
 		end
 	end	
@@ -373,6 +403,8 @@ function gui:HideMainFrame()
 		self.difficultyDropdown = nil;
 		self.encounterDropdown = nil;
 		self.highScoreTabGroup = nil;
+		self.highScoreParsesContainer = nil;
+		self.highScoreParsesScrollFrame = nil;
 	end
 end
 

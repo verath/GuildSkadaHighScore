@@ -29,8 +29,11 @@ addon.dbDefaults = {
 addon.dbVersion = 2
 
 -- Constants
-DEBUG_PRINT = true;
+DEBUG_PRINT = false;
 DEBUG_LOG = false;
+--@debug@
+DEBUG_PRINT = true;
+--@end-debug@
 MAX_NUM_DEBUG_LOG_ENTRIES = 300;
 
 local function getDifficultyNameById(difficultyId)

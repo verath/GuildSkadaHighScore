@@ -16,6 +16,20 @@ local AceGUI = LibStub("AceGUI-3.0");
 local classIdToClassName = {};
 FillLocalizedClassList(classIdToClassName);
 
+
+function gui:FormatNumber(number)
+	if Skada and Skada.FormatNumber then
+		return Skada:FormatNumber(number)
+	else
+		-- Default to Skada's implementation with numberformat enabled
+		if number > 1000000 then
+			return ("%02.2fM"):format(number / 1000000)
+		else
+			return ("%02.1fK"):format(number / 1000)
+		end
+	end
+end
+
 function gui:CreateHighScoreParseEntry(parse, role, rank)
 	local entryWidget = AceGUI:Create("SimpleGroup");
 	entryWidget:SetFullWidth(true);
@@ -34,7 +48,7 @@ function gui:CreateHighScoreParseEntry(parse, role, rank)
 	rankLabel:SetRelativeWidth(relativeWidth);
 	
 	local dpsHpsLabel = AceGUI:Create("Label");
-	local dpsHps = Skada:FormatNumber((role == "HEALER") and parse.hps or parse.dps);
+	local dpsHps = self:FormatNumber((role == "HEALER") and parse.hps or parse.dps);
 	dpsHpsLabel:SetText(dpsHps);
 	dpsHpsLabel:SetFontObject(GameFontHighlightSmall);
 	dpsHpsLabel:SetRelativeWidth(relativeWidth);
@@ -228,7 +242,7 @@ function gui:CreateMainFrame()
 	frame:Hide()
 	frame:SetWidth(800)
 	frame:SetHeight(600)
-	frame:SetTitle("Guild Skada High Score")
+	frame:SetTitle(format("Guild Skada High Score (%s)", addon.versionName));
 	frame:SetLayout("Flow")
 	frame:SetCallback("OnClose", function()
 		gui:HideMainFrame()
@@ -409,17 +423,17 @@ function gui:HideMainFrame()
 end
 
 function gui:OnCloseSpecialWindows()
+	local found;
 	if self.mainFrame then
 		self:HideMainFrame()
-		return true
-	else
-		return self.hooks["CloseSpecialWindows"]();
+		found = 1
 	end
+	return self.hooks["CloseSpecialWindows"]() or found;
 end
 
 
 function gui:OnEnable()
-	self:RawHook("CloseSpecialWindows", "OnCloseSpecialWindows");
+	self:RawHook("CloseSpecialWindows", "OnCloseSpecialWindows", true);
 end
 
 function gui:OnDisable()

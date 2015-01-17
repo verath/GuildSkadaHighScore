@@ -7,7 +7,13 @@ local tremove = tremove;
 local addon = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0", "AceEvent-3.0")
 
 tinsert(addonTable, addon);
-_G[addonName] = addon
+_G[addonName] = addon;
+
+-- Grab the current version string
+addon.versionName = GetAddOnMetadata(addonName, "Version");
+--@debug@
+addon.versionName = '0.0.0-debug';
+--@end-debug@
 
 -- Set up a default prototype for all modules
 local modPrototype = { Debug = function(self, ...) addon:Debug(...) end }

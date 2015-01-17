@@ -30,34 +30,34 @@ function gui:CreateHighScoreParseEntry(parse, role, rank)
 
 	local rankLabel = AceGUI:Create("Label");
 	rankLabel:SetText(rank);
-	rankLabel:SetFontObject(GameFontHighlightLarge);
+	rankLabel:SetFontObject(GameFontHighlightSmall);
 	rankLabel:SetRelativeWidth(relativeWidth);
 	
 	local dpsHpsLabel = AceGUI:Create("Label");
 	local dpsHps = Skada:FormatNumber((role == "HEALER") and parse.hps or parse.dps);
 	dpsHpsLabel:SetText(dpsHps);
-	dpsHpsLabel:SetFontObject(GameFontHighlightLarge);
+	dpsHpsLabel:SetFontObject(GameFontHighlightSmall);
 	dpsHpsLabel:SetRelativeWidth(relativeWidth);
 	
 	local nameLabel = AceGUI:Create("Label");
 	nameLabel:SetText(parse.name);
 	nameLabel:SetColor(classColor.r, classColor.g, classColor.b);
-	nameLabel:SetFontObject(GameFontHighlightLarge);
+	nameLabel:SetFontObject(GameFontHighlightSmall);
 	nameLabel:SetRelativeWidth(relativeWidth);
 
 	local specLabel = AceGUI:Create("Label");
 	specLabel:SetText(parse.specName or "");
-	specLabel:SetFontObject(GameFontHighlightLarge);
+	specLabel:SetFontObject(GameFontHighlightSmall);
 	specLabel:SetRelativeWidth(relativeWidth);
 	
 	local ilvlLabel = AceGUI:Create("Label");
 	ilvlLabel:SetText(parse.itemLevel or "");
-	ilvlLabel:SetFontObject(GameFontHighlightLarge);
+	ilvlLabel:SetFontObject(GameFontHighlightSmall);
 	ilvlLabel:SetRelativeWidth(relativeWidth);
 
 	local dateLabel = AceGUI:Create("Label");
 	dateLabel:SetText(date("%m/%d/%y", parse.startTime));
-	dateLabel:SetFontObject(GameFontHighlightLarge);
+	dateLabel:SetFontObject(GameFontHighlightSmall);
 	dateLabel:SetRelativeWidth(relativeWidth);
 	
 	entryWidget:AddChild(rankLabel);
@@ -154,32 +154,32 @@ function gui:CreateHighScoreScrollFrame()
 	
 	local rankLabel = AceGUI:Create("Label");
 	rankLabel:SetText("Rank");
-	rankLabel:SetFontObject(GameFontHighlightLarge);
+	rankLabel:SetFontObject(GameFontHighlightSmall);
 	rankLabel:SetRelativeWidth(relativeWidth);
 	
 	local dpsHpsLabel = AceGUI:Create("Label");
 	dpsHpsLabel:SetText("DPS/HPS");
-	dpsHpsLabel:SetFontObject(GameFontHighlightLarge);
+	dpsHpsLabel:SetFontObject(GameFontHighlightSmall);
 	dpsHpsLabel:SetRelativeWidth(relativeWidth);
 	
 	local nameLabel = AceGUI:Create("Label");
 	nameLabel:SetText("Name");
-	nameLabel:SetFontObject(GameFontHighlightLarge);
+	nameLabel:SetFontObject(GameFontHighlightSmall);
 	nameLabel:SetRelativeWidth(relativeWidth);
 	
 	local specLabel = AceGUI:Create("Label");
 	specLabel:SetText("Spec");
-	specLabel:SetFontObject(GameFontHighlightLarge);
+	specLabel:SetFontObject(GameFontHighlightSmall);
 	specLabel:SetRelativeWidth(relativeWidth);
 	
 	local ilvlLabel = AceGUI:Create("Label");
 	ilvlLabel:SetText("Item Level");
-	ilvlLabel:SetFontObject(GameFontHighlightLarge);
+	ilvlLabel:SetFontObject(GameFontHighlightSmall);
 	ilvlLabel:SetRelativeWidth(relativeWidth);
 	
 	local dateLabel = AceGUI:Create("Label");
 	dateLabel:SetText("Date");
-	dateLabel:SetFontObject(GameFontHighlightLarge);
+	dateLabel:SetFontObject(GameFontHighlightSmall);
 	dateLabel:SetRelativeWidth(relativeWidth);
 	
 	headerContainer:AddChild(rankLabel);

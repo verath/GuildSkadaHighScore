@@ -62,7 +62,7 @@ end
 local function setAdditionalDataForPlayers(players)
 	for _, player in ipairs(players) do
 		player.role = UnitGroupRolesAssigned(player.name);
-		player.class = UnitClass(player.name);
+		_, player.class = UnitClass(player.name);
 	end
 end
 

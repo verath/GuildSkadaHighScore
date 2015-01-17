@@ -74,7 +74,7 @@ addon.dbDefaults.realm.modules["highscore"] = {
 	}
 }
 
-addon.dbVersion = addon.dbVersion + 4
+addon.dbVersion = addon.dbVersion + 5
 
 -- Constants
 local TRACKED_ZONE_IDS = {

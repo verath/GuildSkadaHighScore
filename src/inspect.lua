@@ -10,18 +10,23 @@ local addon = addonTable[1];
 local inspect = addon:NewModule("inspect", "AceEvent-3.0", "AceTimer-3.0")
 addon.inspect = inspect;
 
--- Constants
-local INSPECT_CACHE_TIMEOUT = 900;
+-- How many seconds before a cached inspect is considered invalid.
+local INSPECT_CACHE_TIMEOUT = 60*60;
+
 local INVENTORY_SLOT_NAMES = {
 	"HeadSlot","NeckSlot","ShoulderSlot","BackSlot","ChestSlot","WristSlot",
 	"HandsSlot","WaistSlot","LegsSlot","FeetSlot","Finger0Slot","Finger1Slot",
 	"Trinket0Slot","Trinket1Slot","MainHandSlot","SecondaryHandSlot"
 }
+
 local NOOP = function() end
 
-local playerGUID = UnitGUID("player");
-local inspectCache = {};
+-- UnitGUID("player") seems to not always be available here,
+-- so PLAYER_GUID is set in OnEnable.
+local PLAYER_GUID = nil;
 
+
+local inspectCache = {};
 
 
 local function isInPVEInstance()
@@ -88,6 +93,10 @@ local function hasPlayerInspectCache(playerId, ignoreExpired)
 	end 
 end
 
+local function unsetPlayerInspectCache(playerId)
+	inspectCache[playerId] = nil;
+end
+
 local function setPlayerInspectCache(playerId, specName, itemLevel)
 	inspectCache[playerId] = {};
 	inspectCache[playerId].time = GetTime();
@@ -126,7 +135,7 @@ function inspect:QueueInspect(player, callback)
 end
 
 function inspect:SetCachedInspectDataForPlayer(player)
-	if player.id == playerGUID then
+	if player.id == PLAYER_GUID then
 		player.specName = getTalentSpec("player")
 		player.itemLevel = getItemLevel("player");
 		return true
@@ -205,7 +214,7 @@ function inspect:PreInspectGroup()
 		if playerName and addon:IsInMyGuild(playerName) then
 
 			local playerId = UnitGUID(playerName)
-			if playerId and playerId ~= playerGUID and not hasPlayerInspectCache(playerId) then 
+			if playerId and playerId ~= PLAYER_GUID and not hasPlayerInspectCache(playerId) then 
 				local player = {name=playerName, id=playerId}
 				self:QueueInspect(player, NOOP);
 			end
@@ -252,7 +261,16 @@ function inspect:ZONE_CHANGED_NEW_AREA(evt)
 	end
 end
 
+function inspect:PLAYER_SPECIALIZATION_CHANGED(evt, unitId)
+	if unitId ~= "player" then
+		local playerId = UnitGUID(unitId);
+		unsetPlayerInspectCache(playerId);
+	end
+end
+
 function inspect:OnEnable()
+	PLAYER_GUID = UnitGUID("player");
+
 	inspect.inspectQueue = {};
 	inspect.notifyInspectTimer = nil;
 	inspect.currentInspectPlayerId = nil;
@@ -260,12 +278,14 @@ function inspect:OnEnable()
 	self:RegisterEvent("INSPECT_READY");
 	self:RegisterEvent("GROUP_ROSTER_UPDATE");
 	self:RegisterEvent("ZONE_CHANGED_NEW_AREA");
+	self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED");
 end
 
 function inspect:OnDisable()
 	self:UnregisterEvent("INSPECT_READY");
 	self:UnregisterEvent("GROUP_ROSTER_UPDATE");
 	self:UnregisterEvent("ZONE_CHANGED_NEW_AREA");
+	self:UnregisterEvent("PLAYER_SPECIALIZATION_CHANGED");
 	
 	self:StopNotifyInspectTimer();
 

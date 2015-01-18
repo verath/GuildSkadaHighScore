@@ -262,7 +262,7 @@ function inspect:ZONE_CHANGED_NEW_AREA(evt)
 end
 
 function inspect:PLAYER_SPECIALIZATION_CHANGED(evt, unitId)
-	if unitId ~= "player" then
+	if unitId and unitId ~= "player" then
 		local playerId = UnitGUID(unitId);
 		unsetPlayerInspectCache(playerId);
 	end

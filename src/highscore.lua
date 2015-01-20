@@ -78,7 +78,8 @@ addon.dbVersion = addon.dbVersion + 5
 
 -- Constants
 local TRACKED_ZONE_IDS = {
-	994 -- Highmaul
+	994, -- Highmaul
+	988 -- Blackrock foundry
 }
 
 

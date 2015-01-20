@@ -26,6 +26,7 @@ local NOOP = function() end
 local PLAYER_GUID = nil;
 
 
+-- A map from player GUID to an object {itemLevel, specName, time}
 local inspectCache = {};
 
 
@@ -109,7 +110,7 @@ function inspect:StartNotifyInspectTimer()
 		self:Debug("Starting notifyInspectTimer");
 
 		self.notifyInspectTimer = self:ScheduleRepeatingTimer(function()
-			self:NOTIFY_INSPECT_TIMER_DONE()
+			self:OnNotifyInspectTimerDone()
 		end, 1);
 	end
 end
@@ -180,6 +181,21 @@ function inspect:GetInspectDataForPlayers(players, callback)
 	end
 end
 
+function inspect:PreInspectGroup()
+	for i=1, GetNumGroupMembers() do
+
+		local playerName = GetRaidRosterInfo(i);
+		if playerName and addon:IsInMyGuild(playerName) then
+
+			local playerId = UnitGUID(playerName)
+			if playerId and playerId ~= PLAYER_GUID and not hasPlayerInspectCache(playerId) then 
+				local player = {name = playerName, id = playerId}
+				self:QueueInspect(player, NOOP);
+			end
+		end
+	end
+end
+
 function inspect:ResolveInspect(playerId, success)
 	if not self.inspectQueue[playerId] then
 		return
@@ -200,6 +216,8 @@ function inspect:ResolveInspect(playerId, success)
 
 		player.specName = inspectCache[player.id].specName;
 		player.itemLevel = inspectCache[player.id].itemLevel;
+
+		ClearInspectPlayer();
 	end
 
 	for _,callback in ipairs(callbacks) do
@@ -207,33 +225,30 @@ function inspect:ResolveInspect(playerId, success)
 	end
 end
 
-function inspect:PreInspectGroup()
-	for i=1, GetNumGroupMembers() do
-
-		local playerName = GetRaidRosterInfo(i);
-		if playerName and addon:IsInMyGuild(playerName) then
-
-			local playerId = UnitGUID(playerName)
-			if playerId and playerId ~= PLAYER_GUID and not hasPlayerInspectCache(playerId) then 
-				local player = {name=playerName, id=playerId}
-				self:QueueInspect(player, NOOP);
-			end
-		end
-	end
-end
-
-function inspect:NOTIFY_INSPECT_TIMER_DONE()
+function inspect:OnNotifyInspectTimerDone()
 	-- Timeout any current inspection
 	if self.currentInspectPlayerId then
 		self:ResolveInspect(self.currentInspectPlayerId, false);
-		self.currentInspectPlayerId = nil;
+	end
+	self.currentInspectPlayerId = nil;
+
+	-- Go trough the inspect queue from start to end, rejecting
+	-- any queued requests for players that can not be inspected,
+	-- until a player that can be inspected is found.
+	for playerId, inspectData in pairs(self.inspectQueue) do
+		if CanInspect(inspectData.player.name, false) then
+			-- Start an inspect request for the player
+			NotifyInspect(inspectData.player.name);
+			self.currentInspectPlayerId = playerId;
+			break;
+		else
+			-- Could not be inspected, reject the request
+			self:ResolveInspect(playerId, false);
+		end
 	end
 
-	local playerId, inspectData = next(self.inspectQueue);
-	if playerId then
-		NotifyInspect(inspectData.player.name);
-		self.currentInspectPlayerId = playerId;
-	else 
+	-- If we have no new inspects pending, stop the timer
+	if not self.currentInspectPlayerId then
 		self:StopNotifyInspectTimer();
 	end
 end

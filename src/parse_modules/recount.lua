@@ -108,23 +108,26 @@ function mod:PutInCombat()
 	self:Debug("Recount: PutInCombat");
 
 	self.recountFightEncounterId = self.currentEncounterId;
-	self.currentEncounterId = nil;
 end
 
 function mod:ENCOUNTER_START(event, encounterID, encounterName, difficultyID, raidSize)
-	self:Debug("Recount: ENCOUNTER_START");
-
 	-- Since recount doesn't track the encounter itself, we have to do it.
+	-- We do this by setting the currentEncounterId whenever an encounter
+	-- starts. If recount is currently in combat, or if recount starts
+	-- combat between ENCOUNTER_START and END, then we track that fight as
+	-- the fight against the encounter id.
+
+	self.currentEncounterId = encounterID;
+
 	if Recount.InCombat then
 		-- If recount currently is in a fight then track
 		-- the current encounter id as the encounter being fighted.
 		self.recountFightEncounterId = encounterID;
-		self.currentEncounterId = nil;
-	else
-		-- If recount has not yet started a fight, store the current
-		-- encounter id. This will be set in the StartCombat hook.
-		self.currentEncounterId = encounterID;
 	end
+end
+
+function mod:ENCOUNTER_END(event, encounterId, encounterName, difficultyId, raidSize, endStatus)
+	self.currentEncounterId = nil;
 end
 
 function mod:OnEnable()
@@ -132,7 +135,8 @@ function mod:OnEnable()
 	self.currentEncounterId = nil;
 	self.recountFightEncounterId = nil;
 
-	self:RegisterEvent("ENCOUNTER_START");	
+	self:RegisterEvent("ENCOUNTER_START");
+	self:RegisterEvent("ENCOUNTER_END");
 
 	self:SecureHook(Recount, "LeaveCombat");
 	self:SecureHook(Recount, "PutInCombat");
@@ -144,6 +148,7 @@ function mod:OnDisable()
 	self.recountFightEncounterId = nil;
 
 	self:UnregisterEvent("ENCOUNTER_START");
+	self:UnregisterEvent("ENCOUNTER_END");
 
 	self:UnHook(Recount, "LeaveCombat");
 	self:UnHook(Recount, "PutInCombat");

@@ -229,26 +229,14 @@ function inspect:OnNotifyInspectTimerDone()
 	-- Timeout any current inspection
 	if self.currentInspectPlayerId then
 		self:ResolveInspect(self.currentInspectPlayerId, false);
-	end
-	self.currentInspectPlayerId = nil;
-
-	-- Go trough the inspect queue from start to end, rejecting
-	-- any queued requests for players that can not be inspected,
-	-- until a player that can be inspected is found.
-	for playerId, inspectData in pairs(self.inspectQueue) do
-		if CanInspect(inspectData.player.name, false) then
-			-- Start an inspect request for the player
-			NotifyInspect(inspectData.player.name);
-			self.currentInspectPlayerId = playerId;
-			break;
-		else
-			-- Could not be inspected, reject the request
-			self:ResolveInspect(playerId, false);
-		end
+		self.currentInspectPlayerId = nil;
 	end
 
-	-- If we have no new inspects pending, stop the timer
-	if not self.currentInspectPlayerId then
+	local playerId, inspectData = next(self.inspectQueue);
+	if playerId then
+		NotifyInspect(inspectData.player.name);
+		self.currentInspectPlayerId = playerId;
+	else
 		self:StopNotifyInspectTimer();
 	end
 end

@@ -65,6 +65,8 @@ addon.dbDefaults.realm.modules["highscore"] = {
 		}
 	},
 	["groupParses"] = {
+		-- These can not have a default value as we are generating
+		-- keys. We have to be able to test for existence.
 		--[[
 		["*"] = { -- groupParseId
 			startTime 	= 0,
@@ -79,7 +81,7 @@ addon.dbVersion = addon.dbVersion + 5
 -- Constants
 local TRACKED_ZONE_IDS = {
 	994, -- Highmaul
-	988 -- Blackrock foundry
+	988 -- Blackrock Foundry
 }
 
 
@@ -92,7 +94,7 @@ local function getReturnableParse(db, parse)
 		parseCopy[key] = val;
 	end
 
-	-- Get duration, statTime from the group parse
+	-- Get duration, startTime from the group parse
 	local groupParse = db.groupParses[parse["groupParseId"]]
 	parseCopy["duration"] = groupParse.duration;
 	parseCopy["startTime"] = groupParse.startTime;

@@ -174,11 +174,6 @@ function addon:PLAYER_GUILD_UPDATE(evt, unitId)
 	end
 end
 
-function addon:ENCOUNTER_START(evt, encounterId, encounterName, difficultyId, raidSize)
-	self:Debug("ENCOUNTER_START", encounterId, encounterName, difficultyId, raidSize)
-	self:SetCurrentEncounter(encounterId, encounterName, difficultyId, raidSize)
-end
-
 function addon:ENCOUNTER_END(evt, encounterId, encounterName, difficultyId, raidSize, endStatus)
 	self:Debug("ENCOUNTER_END", encounterId, encounterName, difficultyId, raidSize, endStatus)
 	if endStatus == 1 then -- Success
@@ -222,7 +217,6 @@ function addon:OnEnable()
 	self.currentZone = {};
 	self.guildName = nil;
 
-	self:RegisterEvent("ENCOUNTER_START")
 	self:RegisterEvent("ENCOUNTER_END")	
 	self:RegisterEvent("PLAYER_GUILD_UPDATE")
 	self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
@@ -240,7 +234,6 @@ function addon:OnDisable()
 	self.currentZone = {};
 	self.guildName = nil;
 
-	self:UnregisterEvent("ENCOUNTER_START")
 	self:UnregisterEvent("ENCOUNTER_END")
 	self:UnregisterEvent("PLAYER_GUILD_UPDATE")
 	self:UnregisterEvent("ZONE_CHANGED_NEW_AREA")

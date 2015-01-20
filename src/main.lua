@@ -85,37 +85,6 @@ function addon:UpdateCurrentZone()
 	local zoneId, _ = GetCurrentMapAreaID()
 	local zoneName = GetRealZoneText();
 	self.currentZone = {id = zoneId, name = zoneName};
-	
-	if IsInInstance() then
-		self:Debug("UpdateCurrentZone", zoneId, zoneName)
-	else
-		self:UnsetCurrentEncounter();
-	end
-end
-
-function addon:SetCurrentEncounter(encounterId, encounterName, difficultyId, raidSize)
-	local difficultyName = getDifficultyNameById(difficultyId);
-
-	self:Debug("SetCurrentEncounter", encounterId, encounterName, difficultyId, raidSize, difficultyName);
-
-	if difficultyName then
-		self.currentEncounter = {
-			zoneId = self.currentZone.id,
-			zoneName = self.currentZone.name,
-			id = encounterId, 
-			name = encounterName, 
-			difficultyId = difficultyId,
-			difficultyName = difficultyName,
-			raidSize = raidSize
-		}
-	end
-end
-
-function addon:UnsetCurrentEncounter()
-	if self.currentEncounter then
-		self:Debug("UnsetCurrentEncounter");
-		self.currentEncounter = nil
-	end
 end
 
 function addon:IsInMyGuild(playerName)
@@ -139,8 +108,14 @@ function addon:GetGuildPlayersFromSet(skadaSet)
 	return players
 end
 
-function addon:OnEncounterEndSuccess()
+function addon:OnEncounterEndSuccess(encounterId, encounterName, difficultyId, raidSize)
 	self:Debug("OnEncounterEndSuccess")
+
+	local difficultyName = getDifficultyNameById(difficultyId);
+	if not difficultyName then
+		self:Debug(format("Could not map difficultyId %d to a name", difficultyId));
+		return;
+	end
 
 	local guildName = self.guildName;
 	if not guildName then
@@ -148,11 +123,15 @@ function addon:OnEncounterEndSuccess()
 		return;
 	end
 
-	local encounter = self.currentEncounter;
-	if not encounter then
-		self:Debug("No current encounter");
-		return
-	end
+	local encounter = {
+		zoneId = self.currentZone.id,
+		zoneName = self.currentZone.name,
+		id = encounterId,
+		name = encounterName,
+		difficultyId = difficultyId,
+		difficultyName = difficultyName,
+		raidSize = raidSize
+	};
 
 	local pmc = self.parseModulesCore;
 	pmc:GetParsesForEncounter(encounter, function(success, startTime, duration, players)
@@ -164,8 +143,6 @@ function addon:OnEncounterEndSuccess()
 			self.highscore:AddEncounterParsesForPlayers(guildName, encounter, players);
 		end)
 	end)
-
-	self:UnsetCurrentEncounter();
 end
 
 function addon:PLAYER_GUILD_UPDATE(evt, unitId)
@@ -177,10 +154,7 @@ end
 function addon:ENCOUNTER_END(evt, encounterId, encounterName, difficultyId, raidSize, endStatus)
 	self:Debug("ENCOUNTER_END", encounterId, encounterName, difficultyId, raidSize, endStatus)
 	if endStatus == 1 then -- Success
-		self:SetCurrentEncounter(encounterId, encounterName, difficultyId, raidSize);
-		self:OnEncounterEndSuccess();
-	else
-		self:UnsetCurrentEncounter();
+		self:OnEncounterEndSuccess(encounterId, encounterName, difficultyId, raidSize);
 	end
 end
 
@@ -213,7 +187,6 @@ function addon:OnInitialize()
 end
 
 function addon:OnEnable()
-	self.currentEncounter = nil;
 	self.currentZone = {};
 	self.guildName = nil;
 
@@ -230,7 +203,6 @@ function addon:OnEnable()
 end
 
 function addon:OnDisable()
-	self.currentEncounter = nil;
 	self.currentZone = {};
 	self.guildName = nil;
 

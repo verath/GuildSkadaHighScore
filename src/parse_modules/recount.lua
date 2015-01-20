@@ -2,18 +2,16 @@ local addonName, addonTable = ...
 local addon = addonTable[1];
 local pmc = addon.parseModulesCore;
 
-local mod = pmc:NewModule("Recount", "AceHook-3.0");
+local mod = pmc:NewModule("Recount", "AceHook-3.0", "AceEvent-3.0");
 if not mod then return end;
 
 -- Global functions
 local wipe = wipe;
 local tinsert = tinsert;
 
-
 function mod:IsActivatable()
 	return IsAddOnLoaded("Recount");
 end
-
 
 function mod:GetPlayersFromLastFight()
 	local players = {};
@@ -66,7 +64,7 @@ end
 function mod:ProcessParseRequest(encounter, callback)
 	-- Look at the most recent one, as previous ones might
 	-- be wipes at the same boss
-	if not Recount.FightingWho or Recount.FightingWho ~= encounter.name then
+	if self.recountFightEncounterId ~= encounter.id then
 		self:Debug("No Recount fight found for boss");
 		return callback(false);
 	end
@@ -82,7 +80,6 @@ function mod:ProcessParseRequest(encounter, callback)
 
 	return callback(true, startTime, duration, playerParses);
 end
-
 
 function mod:GetParsesForEncounter(encounter, callback)
 	-- If recount hasn't finished the fight, wait for it
@@ -107,14 +104,47 @@ function mod:LeaveCombat()
 	end
 end
 
+function mod:PutInCombat()
+	self:Debug("Recount: PutInCombat");
+
+	self.recountFightEncounterId = self.currentEncounterId;
+	self.currentEncounterId = nil;
+end
+
+function mod:ENCOUNTER_START(event, encounterID, encounterName, difficultyID, raidSize)
+	self:Debug("Recount: ENCOUNTER_START");
+
+	-- Since recount doesn't track the encounter itself, we have to do it.
+	if Recount.InCombat then
+		-- If recount currently is in a fight then track
+		-- the current encounter id as the encounter being fighted.
+		self.recountFightEncounterId = encounterID;
+		self.currentEncounterId = nil;
+	else
+		-- If recount has not yet started a fight, store the current
+		-- encounter id. This will be set in the StartCombat hook.
+		self.currentEncounterId = encounterID;
+	end
+end
+
 function mod:OnEnable()
 	self.pendingParseRequests = {};
+	self.currentEncounterId = nil;
+	self.recountFightEncounterId = nil;
+
+	self:RegisterEvent("ENCOUNTER_START");	
 
 	self:SecureHook(Recount, "LeaveCombat");
+	self:SecureHook(Recount, "PutInCombat");
 end
 
 function mod:OnDisable()
 	wipe(self.pendingParseRequests);
+	self.currentEncounterId = nil;
+	self.recountFightEncounterId = nil;
+
+	self:UnregisterEvent("ENCOUNTER_START");
 
 	self:UnHook(Recount, "LeaveCombat");
+	self:UnHook(Recount, "PutInCombat");
 end

@@ -25,8 +25,7 @@ addon.dbDefaults = {
 		modules = {}
 	},
 	global = {
-		dbVersion = 1,
-		debugLog = {}
+		dbVersion = 1
 	}
 }
 
@@ -36,11 +35,9 @@ addon.dbVersion = 2
 
 -- Constants
 DEBUG_PRINT = false;
-DEBUG_LOG = false;
 --@debug@
 DEBUG_PRINT = true;
 --@end-debug@
-MAX_NUM_DEBUG_LOG_ENTRIES = 300;
 
 local function getDifficultyNameById(difficultyId)
 	if difficultyId == 7 or difficultyId == 17 then
@@ -59,14 +56,6 @@ end
 function addon:Debug(...)
 	if DEBUG_PRINT then
 		self:Print(...)
-	end
-	if DEBUG_LOG then
-		local logData = {date("%d/%m %H:%M:%S")};
-		for i=1, select('#', ...) do
-			local v = select(i, ...)
-			tinsert(logData, v);
-		end
-		tinsert(self.db.global.debugLog, logData);
 	end
 end
 
@@ -94,18 +83,6 @@ function addon:IsInMyGuild(playerName)
 	else
 		return false
 	end
-end
-
-function addon:GetGuildPlayersFromSet(skadaSet)
-	local players = {}
-	for i, player in ipairs(skadaSet.players) do
-		local playerData;
-		if self:IsInMyGuild(player.name) then
-			playerData = {id = player.id, name = player.name, damage = player.damage, healing = player.healing};
-			tinsert(players, playerData);
-		end
-	end
-	return players
 end
 
 function addon:OnEncounterEndSuccess(encounterId, encounterName, difficultyId, raidSize)
@@ -172,17 +149,6 @@ function addon:OnInitialize()
 		self:Debug("Resetting db");
 		self.db:ResetDB();
 		self.db.global.dbVersion = self.dbVersion;
-	end
-
-	-- Purge old logs
-	if DEBUG_LOG then
-		local numLogsToPurge = (#self.db.global.debugLog - MAX_NUM_DEBUG_LOG_ENTRIES);
-		while numLogsToPurge >= 0 do
-			tremove(self.db.global.debugLog, 1)
-			numLogsToPurge = numLogsToPurge - 1;
-		end
-	else
-		wipe(self.db.global.debugLog);
 	end
 end
 

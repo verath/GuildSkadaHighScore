@@ -100,9 +100,14 @@ end
 
 local function setPlayerInspectCache(playerId, specName, itemLevel)
 	inspectCache[playerId] = {};
-	inspectCache[playerId].time = GetTime();
 	inspectCache[playerId].specName = specName;
 	inspectCache[playerId].itemLevel = itemLevel;
+	if specName and itemLevel then
+		-- Dont set time if not all values are provided, as that would
+		-- make this entry valid and prevent inspections of the player
+		-- for the duration of the INSPECT_CACHE_TIMEOUT.
+		inspectCache[playerId].time = GetTime();
+	end
 end
 
 function inspect:StartNotifyInspectTimer()

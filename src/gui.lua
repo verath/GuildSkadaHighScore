@@ -15,19 +15,6 @@ local AceGUI = LibStub("AceGUI-3.0");
 -- Constants
 local RAID_TIME_FORMAT = "%m/%d/%y %H:%M";
 
--- Formats a long number as a more human-readable version.
-function gui:FormatNumber(number)
-	if Skada and Skada.FormatNumber then
-		return Skada:FormatNumber(number)
-	else
-		-- Default to Skada's implementation with numberformat enabled
-		if number > 1000000 then
-			return ("%02.2fM"):format(number / 1000000)
-		else
-			return ("%02.1fK"):format(number / 1000)
-		end
-	end
-end
 
 -- Creats a row of labels taking up 1/numLabels relative
 -- width per label and adds each label to the container.
@@ -119,37 +106,32 @@ function gui:CreateEncounterDropdown()
 	return dropdown;
 end
 
+function gui:CreateNoFilterSelectedLabel()
+	local label = AceGUI:Create("Label");
+	label:SetText("Nothing, click on a name or a time to filter.");
+	label:SetFullWidth(true);
+
+	return label;
+end
 
 function gui:CreateFilterEntry(filterId, filterValue)
-	local container = AceGUI:Create("SimpleGroup");
-	container:SetRelativeWidth(0.5);
-	container:SetLayout("Flow");
-
-	local label = AceGUI:Create("Label");
-	label:SetRelativeWidth(0.65);
-	
+	local filterText;
 	if filterId == "startTime" then
-		label:SetText("Time: " .. 
-			date(RAID_TIME_FORMAT, filterValue));
+		filterText = "Time: " .. date(RAID_TIME_FORMAT, filterValue);
 	elseif filterId == "name" then
-		label:SetText("Name: " .. filterValue);
+		filterText = "Name: " .. filterValue;
 	else 
-		return;
+		return nil;
 	end
 
-
-	local removeButton = AceGUI:Create("Button")
-	removeButton:SetText("Remove");
-	removeButton:SetHeight(18);
-	removeButton:SetRelativeWidth(0.30);
-	removeButton:SetCallback("OnClick", function()
+	local entryBtn = AceGUI:Create("Button")
+	entryBtn:SetText(filterText);
+	entryBtn:SetRelativeWidth(0.5);
+	entryBtn:SetCallback("OnClick", function()
 		self:UnsetParseFilter(filterId);
-	end)
+	end);
 
-	container:AddChild(label);
-	container:AddChild(removeButton);
-
-	return container;
+	return entryBtn;
 end
 
 -- Create the filter container, a row below the dropdowns
@@ -158,16 +140,47 @@ end
 function gui:CreateFilterContainer()
 	local filterContainer = AceGUI:Create("InlineGroup");
 	self.filterContainer = filterContainer;
-	filterContainer:SetFullWidth(true);
+	filterContainer:SetRelativeWidth(0.5);
+	filterContainer:SetAutoAdjustHeight(false);
+	filterContainer:SetHeight(60);
 	filterContainer:SetLayout("Flow");
 	filterContainer:SetTitle("Filtered by");
 	
-	local nothingLabel = AceGUI:Create("Label");
-	nothingLabel:SetText("-- Nothing, click on a player name or a time to filter. --");
-	nothingLabel:SetFullWidth(true);
-	filterContainer:AddChild(nothingLabel);
+	filterContainer:AddChild(self:CreateNoFilterSelectedLabel());
 
 	return filterContainer;
+end
+
+-- Creates the container for the action buttons, i.e.
+-- Report/Purge.
+function gui:CreateActionContainer()
+	local actionContainer = AceGUI:Create("InlineGroup");
+	actionContainer:SetRelativeWidth(0.5);
+	actionContainer:SetAutoAdjustHeight(false);
+	actionContainer:SetHeight(60);
+	actionContainer:SetLayout("Flow");
+	actionContainer:SetTitle("Actions");
+
+	local purgeBtn = AceGUI:Create("Button");
+	purgeBtn:SetText("Purge (NYI)...");
+	purgeBtn:SetDisabled(true);
+	purgeBtn:SetRelativeWidth(0.5);
+	purgeBtn:SetCallback("OnClick", function()
+	end);
+
+	local reportBtn = AceGUI:Create("Button");
+	self.reportButton = reportBtn;
+	reportBtn:SetText("Report...");
+	reportBtn:SetDisabled(true);
+	reportBtn:SetRelativeWidth(0.5);
+	reportBtn:SetCallback("OnClick", function()
+		self:Debug("Report you...");
+	end);
+
+	actionContainer:AddChild(purgeBtn);
+	actionContainer:AddChild(reportBtn);
+
+	return actionContainer;
 end
 
 -- Creates the headers for the parses:
@@ -296,10 +309,26 @@ function gui:CreateMainFrame()
 	dropdownContainer:AddChild(self:CreateEncounterDropdown());
 
 	frame:AddChild(dropdownContainer);
+
 	frame:AddChild(self:CreateFilterContainer());
+	frame:AddChild(self:CreateActionContainer());
 	frame:AddChild(self:CreateHighScoreTabGroup());
 
 	return frame;
+end
+
+-- Formats a long number as a more human-readable version.
+function gui:FormatNumber(number)
+	if Skada and Skada.FormatNumber then
+		return Skada:FormatNumber(number)
+	else
+		-- Default to Skada's implementation with numberformat enabled
+		if number > 1000000 then
+			return ("%02.2fM"):format(number / 1000000)
+		else
+			return ("%02.1fK"):format(number / 1000)
+		end
+	end
 end
 
 -- Takes a list of parse objects and applies filters them
@@ -350,7 +379,9 @@ function gui:DisplayParseFilters()
 	local filterEntries = {}
 	for filterId, filterValue in pairs(self.parseFilters) do
 		local filterEntry = self:CreateFilterEntry(filterId, filterValue);
-		tinsert(filterEntries, filterEntry);
+		if filterEntry then
+			tinsert(filterEntries, filterEntry);
+		end
 	end
 
 	if #filterEntries > 0 then		
@@ -358,10 +389,7 @@ function gui:DisplayParseFilters()
 			self.filterContainer:AddChild(filterEntry)
 		end
 	else
-		local nothingLabel = AceGUI:Create("Label");
-		nothingLabel:SetText("-- Nothing, click on a name or a time to filter. --");
-		nothingLabel:SetFullWidth(true);
-		self.filterContainer:AddChild(nothingLabel);
+		self.filterContainer:AddChild(self:CreateNoFilterSelectedLabel());
 	end
 end
 
@@ -375,19 +403,22 @@ function gui:DisplayParses()
 	local encounter = self.selectedEncounter;
 	local roleId = self.selectedRole;
 	
+	self.reportButton:SetDisabled(true);
+
 	local parsesContainer = self.highScoreParsesContainer;
 	local scrollFrame = self.highScoreParsesScrollFrame;
 	parsesContainer:ReleaseChildren();
 
 	if guildName and zoneId and difficultyId and encounter and roleId then
 		local parses, _ = addon.highscore:GetParses(guildName, zoneId, difficultyId, encounter, roleId);
-		parses = self:FilterParses(parses);
+		self.displayedParses = self:FilterParses(parses);
 
-		if #parses > 0 then
+		if #self.displayedParses > 0 then
+			self.reportButton:SetDisabled(false);
 			parsesContainer:PauseLayout();
 			scrollFrame:PauseLayout();
 			
-			for rank, parse in ipairs(parses) do
+			for rank, parse in ipairs(self.displayedParses) do
 				local entryWidget = self:CreateHighScoreParseEntry(parse, roleId, rank);
 				parsesContainer:AddChild(entryWidget);
 			end
@@ -534,6 +565,7 @@ function gui:HideMainFrame()
 		self.highScoreTabGroup = nil;
 		self.highScoreParsesContainer = nil;
 		self.highScoreParsesScrollFrame = nil;
+		self.reportButton = nil;
 	end
 end
 

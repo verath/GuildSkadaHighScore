@@ -174,7 +174,7 @@ function gui:CreateActionContainer()
 	reportBtn:SetDisabled(true);
 	reportBtn:SetRelativeWidth(0.5);
 	reportBtn:SetCallback("OnClick", function()
-		self:Debug("Report you...");
+		addon.report:ShowReportWindow(self.displayedParses);
 	end);
 
 	actionContainer:AddChild(purgeBtn);

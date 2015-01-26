@@ -319,6 +319,35 @@ function highscore:GetGuilds()
 	return guildNames, numGuilds;
 end
 
+-- Returns the name stored for the encounter id, or nil
+-- if no encounters with that id.
+function highscore:GetEncounterNameById(encounterId)
+	return self.db.encounters[encounterId].encounterName;
+end
+
+-- Returns the name stored for the difficulty id, or nil
+-- if no difficulty with that id.
+function highscore:GetDifficultyNameById(difficultyId)
+	return self.db.difficulties[difficultyId].difficultyName;
+end
+
+-- Returns the name stored for the zone id, or nil
+-- if no zone with that id.
+function highscore:GetZoneNameById(zoneId)
+	return self.db.zones[zoneId].zoneName;
+end
+
+-- Returns the name stored for the guild id, or nil
+-- if no guild with that id.
+function highscore:GetGuildNameById(guildId)
+	-- As our implementation uses the guild name as
+	-- id, we will simply return the value passed in.
+	-- Checking for actual existance is not easy due
+	-- to aceDB defaults and is therefor not done.
+
+	return guildId;
+end
+
 
 function highscore:OnEnable()
 	self.db = addon.db.realm.modules["highscore"];

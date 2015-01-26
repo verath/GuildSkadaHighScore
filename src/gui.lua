@@ -539,6 +539,13 @@ function gui:ShowMainFrame()
 		-- Only show if not already shown
 		self:CreateMainFrame():Show();
 
+		-- Wipe previous session's parse filters if any
+		-- as the filter container is always created as
+		-- if no filters are selected.
+		-- TODO: Create the gui differently to reflect
+		-- selected parseFilters set already?
+		wipe(self.parseFilters);
+
 		if self.selectedGuild then
 			-- Try to restore to same values as before
 			gui:SetSelectedGuild(self.selectedGuild, true);

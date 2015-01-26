@@ -12,7 +12,13 @@ addon.report = report;
 local AceGUI = LibStub("AceGUI-3.0");
 
 
-function report:ShowReportWindow(parses)
+function report:ShowReportWindow(guildId, zoneId, difficultyId, encounterId, parses)
+	self:Debug(
+		addon.highscore:GetGuildNameById(guildId),
+		addon.highscore:GetZoneNameById(zoneId),
+		addon.highscore:GetDifficultyNameById(difficultyId),
+		addon.highscore:GetEncounterNameById(encounterId)
+	);
 	self.parses = parses;
 
 	-- Using Frame instead of Window because ElvUI does not

@@ -179,7 +179,9 @@ function gui:CreateActionContainer()
 			self.selectedZone,
 			self.selectedDifficulty,
 			self.selectedEncounter,
-			self.displayedParses);
+			self.selectedRole,
+			self.displayedParses,
+			self.parseFilters);
 	end);
 
 	actionContainer:AddChild(purgeBtn);

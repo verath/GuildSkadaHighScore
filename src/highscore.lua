@@ -1,3 +1,13 @@
+-- 
+-- highscore.lua
+-- 
+-- Contains the highscore module. Essentially the database
+-- store for the addon, using Ace3 DB.
+-- 
+-- This module also has various getters for the GUI to grab
+-- data out of the database.
+--
+
 local addonName, addonTable = ...
 
 -- Global functions for faster access
@@ -343,7 +353,7 @@ function highscore:GetGuildNameById(guildId)
 	-- As our implementation uses the guild name as
 	-- id, we will simply return the value passed in.
 	-- Checking for actual existance is not easy due
-	-- to aceDB defaults and is therefor not done.
+	-- to aceDB defaults and is therefore not done.
 
 	return guildId;
 end

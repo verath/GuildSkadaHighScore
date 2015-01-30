@@ -1,3 +1,13 @@
+-- 
+-- main.lua
+-- 
+-- Contains the main setup code for the addon and the modules and
+-- some shared code that is used throughout the addon.
+-- Also handles the quering of the parse module on ENCOUNTER_END
+-- and forwarding these results, via the inspect module, to the
+-- highscore module.
+--
+
 local addonName, addonTable = ...
 
 local tinsert = tinsert;
@@ -39,6 +49,9 @@ DEBUG_PRINT = false;
 DEBUG_PRINT = true;
 --@end-debug@
 
+
+-- Takes a difficulty ID and attempts to return a string
+-- representation of that difficulty.
 local function getDifficultyNameById(difficultyId)
 	if difficultyId == 7 or difficultyId == 17 then
 		return "LFR";
@@ -53,12 +66,16 @@ local function getDifficultyNameById(difficultyId)
 	return nil
 end
 
+-- A wrapper around :Pring that only prints if the
+-- DEBUG_PRINT flag is set to true.
 function addon:Debug(...)
 	if DEBUG_PRINT then
 		self:Print(...)
 	end
 end
 
+-- Function that updates the guild name of the player
+-- by quering the GetGuildInfo method for the player.
 function addon:UpdateMyGuildName()
 	if IsInGuild() then
 		local guildName, _, _ = GetGuildInfo("player")
@@ -70,12 +87,16 @@ function addon:UpdateMyGuildName()
 	end
 end
 
+-- Sets the current zone to the zone the player
+-- is currently in.
 function addon:UpdateCurrentZone()
 	local zoneId, _ = GetCurrentMapAreaID()
 	local zoneName = GetRealZoneText();
 	self.currentZone = {id = zoneId, name = zoneName};
 end
 
+-- Tests if a player with name playerName is in the same
+-- guild as the player running this addon.
 function addon:IsInMyGuild(playerName)
 	if self.guildName then
 		local guildName, _, _ = GetGuildInfo(playerName)
@@ -85,6 +106,13 @@ function addon:IsInMyGuild(playerName)
 	end
 end
 
+-- Method called when ENCOUNTER_END was called and the success
+-- status was true. 
+-- This method uses the parse module to get a list of all valid 
+-- parses. It then uses the inspect module to get additional 
+-- information for the players with parses. Finally it forwards 
+-- the results to the highscore module for it to store the data 
+-- in the database.
 function addon:OnEncounterEndSuccess(encounterId, encounterName, difficultyId, raidSize)
 	self:Debug("OnEncounterEndSuccess")
 
@@ -110,16 +138,20 @@ function addon:OnEncounterEndSuccess(encounterId, encounterName, difficultyId, r
 		raidSize = raidSize
 	};
 
-	local pmc = self.parseModulesCore;
-	pmc:GetParsesForEncounter(encounter, function(success, startTime, duration, players)
-		if not success then return end;
+	local function handleInspectData()
+		addon.highscore:AddEncounterParsesForPlayers(guildName, encounter, players);
+	end
 
+	local function handleParses(success, startTime, duration, players)
+		if not success then return end;
 		encounter.startTime = startTime;
 		encounter.duration = duration;
-		self.inspect:GetInspectDataForPlayers(players, function()
-			self.highscore:AddEncounterParsesForPlayers(guildName, encounter, players);
-		end)
-	end)
+		addon.inspect:GetInspectDataForPlayers(players, handleInspectData);
+	end
+
+	-- Get parses from the parse provider
+	local pmc = self.parseModulesCore;
+	pmc:GetParsesForEncounter(encounter, handleParses);
 end
 
 function addon:PLAYER_GUILD_UPDATE(evt, unitId)
@@ -130,7 +162,8 @@ end
 
 function addon:ENCOUNTER_END(evt, encounterId, encounterName, difficultyId, raidSize, endStatus)
 	self:Debug("ENCOUNTER_END", encounterId, encounterName, difficultyId, raidSize, endStatus)
-	if endStatus == 1 then -- Success
+	if endStatus == 1 then 
+		-- Encounter killed successful
 		self:OnEncounterEndSuccess(encounterId, encounterName, difficultyId, raidSize);
 	end
 end

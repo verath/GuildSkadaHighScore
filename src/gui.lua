@@ -1,3 +1,10 @@
+-- 
+-- gui.lua
+-- 
+-- Contains the main GUI module. This module is responsible
+-- for the main frame of the addon.
+--
+
 local addonName, addonTable = ...
 
 -- Global functions for faster access
@@ -380,6 +387,8 @@ function gui:ToggleParseFilter(attribute, value)
 	end
 end
 
+-- Updates the currently selected filters box to match
+-- the filters selected.
 function gui:DisplayParseFilters()
 	self.filterContainer:ReleaseChildren();
 

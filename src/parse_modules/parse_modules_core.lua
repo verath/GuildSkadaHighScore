@@ -1,6 +1,13 @@
+-- 
+-- parse_modules_core.lua
+-- 
+-- Contains the core module for the parse modules. This module
+-- is responsible for picking one of the parse modules that
+-- can be activated and then forwarding requests for parses to
+-- the selected parse provider.
 --
--- The parseModulesCore is a container module for our
--- parse provider modules.
+-- A parse provider is a module that uses some damage mod (e.g. Skada)
+-- and returns parses from the last encounter when asked for.
 --
 
 local addonName, addonTable = ...
@@ -69,7 +76,7 @@ end
 -- Function for getting parses for an encounter. This
 -- function will forward the call to the selected parse
 -- provider if available. Will also add additional information
--- like spec and role to successful parse fetches
+-- like class and role to successful parse fetches
 function pmc:GetParsesForEncounter(encounter, callback)
 	local parseProvider = self.selectedParseProvider
 	if parseProvider then

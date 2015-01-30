@@ -1,6 +1,10 @@
 package-as: GuildSkadaHighScore
 
+manual-changelog: 
+    filename: CHANGELOG.md
+    markup-type: markdown
+
 externals:
-	lib/Ace3:
-		url: svn://svn.wowace.com/wow/ace3/mainline/trunk
-		tag: latest
+    lib/Ace3:
+        url: svn://svn.wowace.com/wow/ace3/mainline/trunk
+        tag: latest

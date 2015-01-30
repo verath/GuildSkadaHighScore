@@ -138,15 +138,15 @@ function addon:OnEncounterEndSuccess(encounterId, encounterName, difficultyId, r
 		raidSize = raidSize
 	};
 
-	local function handleInspectData()
-		addon.highscore:AddEncounterParsesForPlayers(guildName, encounter, players);
-	end
 
 	local function handleParses(success, startTime, duration, players)
 		if not success then return end;
 		encounter.startTime = startTime;
 		encounter.duration = duration;
-		addon.inspect:GetInspectDataForPlayers(players, handleInspectData);
+
+		addon.inspect:GetInspectDataForPlayers(players, function()
+			addon.highscore:AddEncounterParsesForPlayers(guildName, encounter, players);
+		end);
 	end
 
 	-- Get parses from the parse provider

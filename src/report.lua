@@ -1,3 +1,11 @@
+-- 
+-- report.lua
+-- 
+-- Contains the report module that handles the creation of the
+-- report window and the sending of selected number of parses
+-- to the selected channel.
+--
+
 local addonName, addonTable = ...
 
 -- Global functions for faster access
@@ -13,15 +21,21 @@ addon.report = report;
 local AceGUI = LibStub("AceGUI-3.0");
 
 -- Constants
+
+-- Formats for a parse string
 -- [25/02/01] #1. 24.5k - Saniera (Shadow, 680ilvl)
 local PARSE_OUTPUT_FORMAT_NO_ILVL_SPEC = "[%s] #%d. %s - %s";
 local PARSE_OUTPUT_FORMAT_NO_SPEC = PARSE_OUTPUT_FORMAT_NO_ILVL_SPEC .. " (%d ilvl)";
 local PARSE_OUTPUT_FORMAT_NO_ILVL = PARSE_OUTPUT_FORMAT_NO_ILVL_SPEC .. " (%s)";
 local PARSE_OUTPUT_FORMAT 		  = PARSE_OUTPUT_FORMAT_NO_ILVL_SPEC .. " (%s, %d ilvl)";
 
+-- The time format used for parses
 local PARSE_TIME_FORMAT = "%x";
 
-local FILTER_TIME_FORMAT = "%m/%d/%y %H:%M";
+-- The time format used for the startTime value filter
+local FILTER_START_TIME_FORMAT = "%m/%d/%y %H:%M";
+
+-- The channels that can be picked for reporting data to
 local SEND_TO_CHANNELS_LIST = {
 	SELF = "Self",
 	SAY = "Say",
@@ -33,8 +47,12 @@ local SEND_TO_CHANNELS_LIST = {
 };
 local SEND_TO_CHANNELS_LIST_ORDER = {"SELF", "SAY", "PARTY", "RAID", "GUILD", "INSTANCE_CHAT", "WHISPER"};
 
+-- Max number of parses to send, so we don't spam too too much...
 local MAX_PARSES_TO_SEND = 30;
 
+
+-- Takes a parse and rank and returns a formatted string
+-- representing the parse.
 local function getParseStringFromParse(rank, parse)
 	local dataNum = (parse.role == "HEALER") and parse.hps or parse.dps;
 	dataNum = addon.gui:FormatNumber(dataNum);
@@ -54,12 +72,49 @@ local function getParseStringFromParse(rank, parse)
 	end
 end
 
+-- Takes a list of filters and returns a formatted string
+-- representing the filters and their values.
+local function createFilterString(filters)
+	local filterString;
+	for filterKey, filterValue in pairs(filters) do
+		if not filterString then 
+			filterString = "";
+		else
+			filterString = filterString .. ", ";
+		end
 
+		if filterKey == "name" then
+			filterString = filterString .. format("Name: %s", filterValue);
+		elseif filterKey == "startTime" then
+			filterString = filterString .. format("Time: %s", date(FILTER_TIME_FORMAT, filterValue));
+		else
+			filterString = filterString .. format("%s: %s", filterKey, filterValue);
+		end
+	end
+	return filterString;
+end
+
+-- Takes a role ID and returns a string representation of
+-- what the data will be. For DAMAGER/TANKS this will be DPS
+-- and for healers this data will be HPS.
+local function createDataTypeName(roleId)
+	if roleId == "DAMAGER" then
+		return "DPS"
+	elseif roleId == "HEALER" then
+		return "HPS"
+	elseif roleId == "TANK" then
+		return "DPS (Tanks)"
+	end
+end
+
+
+-- Sends the parses to the channel specified with the title
+-- and filterString included.
 function report:SendData(channelId, whisperToName, dataTitle, filterString, parses, numParses)
 	numParses = min(numParses, MAX_PARSES_TO_SEND);
 	channelId = string.upper(channelId);
 
-	local lines = {"--Guild Skada High Score--", dataTitle};
+	local lines = {"-- Guild Skada High Score --", dataTitle};
 
 	if filterString then
 		tinsert(lines, format("Filtered by [%s]", filterString));
@@ -98,47 +153,27 @@ function report:SendData(channelId, whisperToName, dataTitle, filterString, pars
 	end
 end
 
-
-function report:ShowReportWindow(guildId, zoneId, difficultyId, encounterId, roleId, parses, filters)
+-- Hides and releases the report window if it is show,
+-- if it is not shown this does nothing.
+function report:HideReportWindow()
 	if self.currentFrame then
 		self.currentFrame:Release();
 		self.currentFrame = nil;
 	end
+end
+
+-- Shows the report window for the supplied encounter and parses.
+function report:ShowReportWindow(guildId, zoneId, difficultyId, encounterId, roleId, parses, filters)
+	self:HideReportWindow();
 
 	local channelId = self.lastChannelId or "SELF";
-
 	local guildName = addon.highscore:GetGuildNameById(guildId);
 	local zoneName = addon.highscore:GetZoneNameById(zoneId);
 	local difficultyName = addon.highscore:GetDifficultyNameById(difficultyId);
 	local encounterName = addon.highscore:GetEncounterNameById(encounterId);
 	
-	local dataTypeName;
-	if roleId == "DAMAGER" then
-		dataTypeName = "DPS"
-	elseif roleId == "HEALER" then
-		dataTypeName = "HPS"
-	elseif roleId == "TANK" then
-		dataTypeName = "DPS (Tanks)"
-	else
-		return;
-	end
-	
-	local filterString;
-	for filterKey, filterValue in pairs(filters) do
-		if filterString then 
-			filterString = filterString .. ", ";
-		else
-			filterString = "";
-		end
-		if filterKey == "name" then
-			filterString = filterString .. "Name: " .. filterValue;
-		elseif filterKey == "startTime" then
-			filterString = filterString .. "Time: " .. date(FILTER_TIME_FORMAT, filterValue);
-		else
-			filterString = filterString .. filterKey .. ": " .. filterValue;
-		end
-	end
-
+	local dataTypeName = createDataTypeName(roleId);
+	local filterString = createFilterString(filters);
 	local dataTitle = format("<%s> %s (%s) - %s", guildName, encounterName, difficultyName, dataTypeName);
 
 	local frame = AceGUI:Create("Frame")
@@ -184,8 +219,7 @@ function report:ShowReportWindow(guildId, zoneId, difficultyId, encounterId, rol
 		local numParses = numToSendSlider:GetValue();
 		local whisperToName = whisperToNameEditBox:GetText();
 		self:SendData(channelId, whisperToName, dataTitle, filterString, parses, numParses);
-		report.currentFrame = nil;
-		frame:Release();
+		report:HideReportWindow();
 	end);
 
 	frame:AddChild(dataTitleLabel);

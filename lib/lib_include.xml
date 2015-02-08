@@ -10,4 +10,6 @@
 	<Include file="Ace3\AceGUI-3.0\AceGUI-3.0.xml"/>
 	<Include file="Ace3\AceHook-3.0\AceHook-3.0.xml"/>
 	<Include file="Ace3\AceTimer-3.0\AceTimer-3.0.xml"/>
+
+	<Include file="Ace3\AceConfig-3.0\AceConfig-3.0.xml"/>
 </Ui>

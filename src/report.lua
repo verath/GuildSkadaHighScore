@@ -153,18 +153,18 @@ function report:SendData(channelId, whisperToName, dataTitle, filterString, pars
 	end
 end
 
--- Hides and releases the report window if it is show,
+-- Hides and releases the report frame if it is show,
 -- if it is not shown this does nothing.
-function report:HideReportWindow()
+function report:HideReportFrame()
 	if self.currentFrame then
 		self.currentFrame:Release();
 		self.currentFrame = nil;
 	end
 end
 
--- Shows the report window for the supplied encounter and parses.
-function report:ShowReportWindow(guildId, zoneId, difficultyId, encounterId, roleId, parses, filters)
-	self:HideReportWindow();
+-- Shows the report frame for the supplied encounter and parses.
+function report:ShowReportFrame(guildId, zoneId, difficultyId, encounterId, roleId, parses, filters)
+	self:HideReportFrame();
 
 	local channelId = self.lastChannelId or "SELF";
 	local guildName = addon.highscore:GetGuildNameById(guildId);
@@ -219,7 +219,7 @@ function report:ShowReportWindow(guildId, zoneId, difficultyId, encounterId, rol
 		local numParses = numToSendSlider:GetValue();
 		local whisperToName = whisperToNameEditBox:GetText();
 		self:SendData(channelId, whisperToName, dataTitle, filterString, parses, numParses);
-		report:HideReportWindow();
+		report:HideReportFrame();
 	end);
 
 	frame:AddChild(dataTitleLabel);

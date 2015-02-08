@@ -147,7 +147,7 @@ end
 function gui:CreateFilterContainer()
 	local filterContainer = AceGUI:Create("InlineGroup");
 	self.filterContainer = filterContainer;
-	filterContainer:SetRelativeWidth(0.5);
+	filterContainer:SetRelativeWidth(0.75);
 	filterContainer:SetAutoAdjustHeight(false);
 	filterContainer:SetHeight(60);
 	filterContainer:SetLayout("Flow");
@@ -162,26 +162,19 @@ end
 -- Report/Purge.
 function gui:CreateActionContainer()
 	local actionContainer = AceGUI:Create("InlineGroup");
-	actionContainer:SetRelativeWidth(0.5);
+	actionContainer:SetRelativeWidth(0.25);
 	actionContainer:SetAutoAdjustHeight(false);
 	actionContainer:SetHeight(60);
 	actionContainer:SetLayout("Flow");
 	actionContainer:SetTitle("Actions");
 
-	local purgeBtn = AceGUI:Create("Button");
-	purgeBtn:SetText("Purge (NYI)...");
-	purgeBtn:SetDisabled(true);
-	purgeBtn:SetRelativeWidth(0.5);
-	purgeBtn:SetCallback("OnClick", function()
-	end);
-
 	local reportBtn = AceGUI:Create("Button");
 	self.reportButton = reportBtn;
 	reportBtn:SetText("Report...");
 	reportBtn:SetDisabled(true);
-	reportBtn:SetRelativeWidth(0.5);
+	reportBtn:SetRelativeWidth(1);
 	reportBtn:SetCallback("OnClick", function()
-		addon.report:ShowReportWindow(
+		addon.report:ShowReportFrame(
 			self.selectedGuild,
 			self.selectedZone,
 			self.selectedDifficulty,
@@ -191,9 +184,7 @@ function gui:CreateActionContainer()
 			self.parseFilters);
 	end);
 
-	actionContainer:AddChild(purgeBtn);
 	actionContainer:AddChild(reportBtn);
-
 	return actionContainer;
 end
 

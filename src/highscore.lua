@@ -374,7 +374,41 @@ function highscore:PurgeParses(olderThanDate, minParsesPerPlayer)
 	end
 
 	for _, id in ipairs(oldGroupParseIds) do
+		local groupParse = self.db.groupParses[id];
+		local guildName = groupParse.guildName;
+		local zoneId = groupParse.zoneId;
+		local difficultyId = groupParse.difficultyId;
+		local encounterId = groupParse.encounterId;
+		self.db.groupParses[id] = nil;
 
+		local parses = getParsesTable(self.db, guildName, zoneId, difficultyId, encounterId);
+
+		if minParsesPerPlayer == 0 then
+			for key, parse in pairs(parses) do
+				if parse.groupParseId == id then
+					parses[key] = nil;
+				end
+			end
+		else
+
+		end
+
+		if next(parses) == nil then
+			self:Debug("All parses removed for", guildName, zoneId, difficultyId, encounterId);
+			self.db.guilds[guildName].zones[zoneId].difficulties[difficultyId].encounters[encounterId] = nil;
+		end
+
+		if next(self.db.guilds[guildName].zones[zoneId].difficulties[difficultyId].encounters) == nil then
+			self.db.guilds[guildName].zones[zoneId].difficulties[difficultyId] = nil;
+		end
+
+		if next(self.db.guilds[guildName].zones[zoneId].difficulties) == nil then
+			self.db.guilds[guildName].zones[zoneId] = nil;
+		end
+
+		if next(self.db.guilds[guildName].zones) then
+			self.db.guilds[guildName] = nil;
+		end
 	end
 end
 

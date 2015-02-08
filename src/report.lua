@@ -156,9 +156,9 @@ end
 -- Hides and releases the report frame if it is show,
 -- if it is not shown this does nothing.
 function report:HideReportFrame()
-	if self.currentFrame then
-		self.currentFrame:Release();
-		self.currentFrame = nil;
+	if self.reportFrame then
+		self.reportFrame:Release();
+		self.reportFrame = nil;
 	end
 end
 
@@ -219,7 +219,7 @@ function report:ShowReportFrame(guildId, zoneId, difficultyId, encounterId, role
 		local numParses = numToSendSlider:GetValue();
 		local whisperToName = whisperToNameEditBox:GetText();
 		self:SendData(channelId, whisperToName, dataTitle, filterString, parses, numParses);
-		report:HideReportFrame();
+		self:HideReportFrame();
 	end);
 
 	frame:AddChild(dataTitleLabel);
@@ -231,6 +231,24 @@ function report:ShowReportFrame(guildId, zoneId, difficultyId, encounterId, role
 	frame:AddChild(numToSendSlider);
 	frame:AddChild(sendButton);
 
-	self.currentFrame = frame;
+	self.reportFrame = frame;
 	frame:Show();
+end
+
+function report:OnCloseSpecialWindows()
+	local found;
+	if self.reportFrame then
+		self:HideReportFrame()
+		found = 1
+	end
+	return self.hooks["CloseSpecialWindows"]() or found;
+end
+
+function report:OnEnable()
+	self:RawHook("CloseSpecialWindows", "OnCloseSpecialWindows", true);
+end
+
+function report:OnDisable()
+	self:HideReportFrame();
+	self:UnHook("CloseSpecialWindows");
 end

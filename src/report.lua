@@ -99,7 +99,7 @@ function report:SendData(channelId, whisperToName, dataTitle, filterString, pars
 end
 
 
-function report:ShowReportWindow(guildId, zoneId, difficultyId, encounterId, roleId, parses, filters)
+function report:ShowReportFrame(guildId, zoneId, difficultyId, encounterId, roleId, parses, filters)
 	if self.currentFrame then
 		self.currentFrame:Release();
 		self.currentFrame = nil;

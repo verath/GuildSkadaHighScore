@@ -174,7 +174,7 @@ function gui:CreateActionContainer()
 	reportBtn:SetDisabled(true);
 	reportBtn:SetRelativeWidth(0.5);
 	reportBtn:SetCallback("OnClick", function()
-		addon.report:ShowReportWindow(
+		addon.report:ShowReportFrame(
 			self.selectedGuild,
 			self.selectedZone,
 			self.selectedDifficulty,

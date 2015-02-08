@@ -25,7 +25,7 @@ addon.highscore = highscore;
 -- db defaults
 addon.dbDefaults.realm.modules["highscore"] = {
 	["guilds"] = {
-		["*"] = { -- Guild Name
+		["*"] = { -- guildName
 			["zones"] = {
 				["*"] = { -- zoneId
 					["difficulties"] = {
@@ -79,14 +79,18 @@ addon.dbDefaults.realm.modules["highscore"] = {
 		-- keys. We have to be able to test for existence.
 		--[[
 		["*"] = { -- groupParseId
-			startTime 	= 0,
-			duration 	= 0,
+			startTime    = 0,
+			duration     = 0,
+			guildName    = "",
+			zoneId       = 0,
+			difficultyId = 0,
+			encounterId  = 0,
 		}
 		--]]
 	}
 }
 
-addon.dbVersion = addon.dbVersion + 5
+addon.dbVersion = addon.dbVersion + 6;
 
 -- Constants
 local TRACKED_ZONE_IDS = {
@@ -358,6 +362,21 @@ function highscore:GetGuildNameById(guildId)
 	return guildId;
 end
 
+-- Removes parses that is older than "olderThanDate". If minParsesPerPlayer
+-- is > 0, that many parses will be kept for the player/encounter combination.
+function highscore:PurgeParses(olderThanDate, minParsesPerPlayer)
+	local oldGroupParseIds = {};
+
+	for id, groupParse in pairs(self.db.groupParses) do
+		if groupParse.startTime < olderThanDate then
+			tinsert(oldGroupParseIds, id);
+		end
+	end
+
+	for _, id in ipairs(oldGroupParseIds) do
+
+	end
+end
 
 function highscore:OnEnable()
 	self.db = addon.db.realm.modules["highscore"];

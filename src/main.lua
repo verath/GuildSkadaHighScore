@@ -33,16 +33,14 @@ addon:SetDefaultModulePrototype(modPrototype)
 addon.dbDefaults = {
 	realm = {
 		modules = {},
-		options = {}
-	},
-	global = {
+		options = {},
 		dbVersion = 1
-	}
+	},
 }
 
 -- The current db version. Clear (migrate?) the database if 
 -- version of database doesn't match this version.
-addon.dbVersion = 2;
+addon.dbVersion = 3;
 
 -- Constants
 DEBUG_PRINT = false;
@@ -177,13 +175,7 @@ function addon:OnInitialize()
 	self.db = LibStub("AceDB-3.0"):New("GuildSkadaHighScoreDB", addon.dbDefaults, true)
 	
 	-- Make sure db version is in sync
-	if self.db.global.dbVersion ~= self.dbVersion then
-		self:Debug(format("Found not matching db versions: db=%d, addon=%d", 
-			self.db.global.dbVersion, self.dbVersion));
-		self:Debug("Resetting db");
-		self.db:ResetDB();
-		self.db.global.dbVersion = self.dbVersion;
-	end
+	self.migrate:DoMigration();
 end
 
 function addon:OnEnable()

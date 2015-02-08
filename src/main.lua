@@ -22,7 +22,8 @@ addon:SetDefaultModulePrototype(modPrototype)
 -- Db default settings
 addon.dbDefaults = {
 	realm = {
-		modules = {}
+		modules = {},
+		options = {}
 	},
 	global = {
 		dbVersion = 1
@@ -31,7 +32,7 @@ addon.dbDefaults = {
 
 -- The current db version. Clear (migrate?) the database if 
 -- version of database doesn't match this version.
-addon.dbVersion = 2
+addon.dbVersion = 2;
 
 -- Constants
 DEBUG_PRINT = false;
@@ -160,8 +161,12 @@ function addon:OnEnable()
 	self:RegisterEvent("PLAYER_GUILD_UPDATE")
 	self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 
-	self:RegisterChatCommand("gshs", function()
-		self.gui:ShowMainFrame();
+	self:RegisterChatCommand("gshs", function(arg)
+		if arg == "config" then
+			self.options:ShowOptionsFrame();
+		else
+			self.gui:ShowMainFrame();
+		end
 	end)
 
 	self:UpdateMyGuildName();

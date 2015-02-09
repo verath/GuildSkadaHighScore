@@ -7,7 +7,7 @@ addon.options = options;
 
 
 addon.dbDefaults.realm.options = {
-	purgeEnabled = true,
+	purgeEnabled = false,
 	purgeMaxParseAge = 30,
 	purgeMinPlayerParsesPerFight = 2,
 }

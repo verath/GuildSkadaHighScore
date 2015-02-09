@@ -13,6 +13,7 @@ local addonName, addonTable = ...
 -- Global functions for faster access
 local tinsert = tinsert;
 local tContains = tContains;
+local tremove = tremove;
 local sort = sort;
 local random = random;
 local format = format;
@@ -99,6 +100,50 @@ local TRACKED_ZONE_IDS = {
 	988 -- Blackrock Foundry
 }
 
+-- Function that returns a list of keys in `parses` for the top
+-- `numParses` for each player and role combination in `parses`.
+local function getBestParsesForPlayers(parses, groupParses, numParses)
+	local bestParses = {
+		["DAMAGER"] = {},
+		["TANK"] 	= {},
+		["HEALER"] 	= {}
+	}
+
+	for key, parse in ipairs(parses) do
+		local playerId = parse.playerId;
+		local role = parse.role;
+		local duration = groupParses[parse["groupParseId"]].duration;
+		local amount = parse.damage and (parse.damage / duration) or (parse.healing / duration);
+
+		if not bestParses[role][playerId] then
+			bestParses[role][playerId] = {};
+		end
+
+		if #bestParses[role][playerId] < numParses then
+			tinsert(bestParses[role][playerId], {key = key, amount = amount});
+		elseif numParses > 0 then
+			-- Sort so that the lowest amount is first element
+			sort(bestParses[role][playerId], function(a, b)
+				return a.amount < b.amount;
+			end);
+			-- Replace first element if current is higher
+			if bestParses[role][playerId][1].amount < amount then
+				bestParses[role][playerId][1] = {key = key, amount = amount};
+			end
+		end
+	end
+
+	local bestParsesKeys = {};
+	for _, roleData in pairs(bestParses) do
+		for _, playerData in pairs(roleData) do
+			for _, parse in pairs(playerData) do
+				tinsert(bestParsesKeys, parse.key);
+			end
+		end
+	end
+
+	return bestParsesKeys;
+end
 
 -- Function for convering a database representation of 
 -- a parse to a parse that can be returned to users.
@@ -141,7 +186,7 @@ local function generateRandomKey()
 	return format("%x-%x-%x", r1, r2, r3);
 end
 
-local function addGroupParse(db, startTime, duration)
+local function addGroupParse(db, startTime, duration, guildName, zoneId, difficultyId, encounterId)
 	-- Find a new unique key for the raid parse
 	local key = generateRandomKey();
 	while db.groupParses[key] do
@@ -149,8 +194,12 @@ local function addGroupParse(db, startTime, duration)
 	end
 
 	db.groupParses[key] = {
-		startTime 	= startTime,
-		duration 	= duration
+		startTime = startTime,
+		duration = duration,
+		guildName = guildName,
+		zoneId = zoneId,
+		difficultyId = difficultyId,
+		encounterId = encounterId
 	};
 
 	return key
@@ -235,7 +284,8 @@ function highscore:AddEncounterParsesForPlayers(guildName, encounter, players)
 	addEncounter(self.db, encounterId, encounterName);
 
 	-- Add a group parse entry, holding data shared between all players
-	local groupParseId = addGroupParse(self.db, startTime, duration);
+	local groupParseId = addGroupParse(self.db, startTime, duration, 
+		guildName, zoneId, difficultyId, encounterId);
 
 	local parsesTable = getParsesTable(self.db, guildName, zoneId, difficultyId, encounterId);
 
@@ -377,49 +427,48 @@ end
 -- Removes parses that is older than "olderThanDate". If minParsesPerPlayer
 -- is > 0, that many parses will be kept for the player/encounter combination.
 function highscore:PurgeParses(olderThanDate, minParsesPerPlayer)
+	local db = addon.db.realm.modules["highscore"];
 	local oldGroupParseIds = {};
 
-	for id, groupParse in pairs(self.db.groupParses) do
+	for id, groupParse in pairs(db.groupParses) do
 		if groupParse.startTime < olderThanDate then
 			tinsert(oldGroupParseIds, id);
 		end
 	end
 
 	for _, id in ipairs(oldGroupParseIds) do
-		local groupParse = self.db.groupParses[id];
+		local groupParse = db.groupParses[id];
 		local guildName = groupParse.guildName;
 		local zoneId = groupParse.zoneId;
 		local difficultyId = groupParse.difficultyId;
 		local encounterId = groupParse.encounterId;
-		self.db.groupParses[id] = nil;
 
-		local parses = getParsesTable(self.db, guildName, zoneId, difficultyId, encounterId);
+		local parses = getParsesTable(db, guildName, zoneId, difficultyId, encounterId);
 
+		local allRemoved = true;
 		if minParsesPerPlayer == 0 then
-			for key, parse in pairs(parses) do
+			for i = #parses, 1, -1 do
+				local parse = parses[i]
 				if parse.groupParseId == id then
-					parses[key] = nil;
+					tremove(parses, i);
 				end
 			end
 		else
-
+			local bestParsesKeys = getBestParsesForPlayers(parses, db.groupParses, minParsesPerPlayer);
+			for i = #parses, 1, -1 do
+				local parse = parses[i]
+				if parse.groupParseId == id then
+					if tContains(bestParsesKeys, i) then
+						allRemoved = false;
+					else
+						tremove(parses, i);
+					end
+				end
+			end
 		end
 
-		if next(parses) == nil then
-			self:Debug("All parses removed for", guildName, zoneId, difficultyId, encounterId);
-			self.db.guilds[guildName].zones[zoneId].difficulties[difficultyId].encounters[encounterId] = nil;
-		end
-
-		if next(self.db.guilds[guildName].zones[zoneId].difficulties[difficultyId].encounters) == nil then
-			self.db.guilds[guildName].zones[zoneId].difficulties[difficultyId] = nil;
-		end
-
-		if next(self.db.guilds[guildName].zones[zoneId].difficulties) == nil then
-			self.db.guilds[guildName].zones[zoneId] = nil;
-		end
-
-		if next(self.db.guilds[guildName].zones) then
-			self.db.guilds[guildName] = nil;
+		if allRemoved then
+			db.groupParses[id] = nil;
 		end
 	end
 end

@@ -1,3 +1,10 @@
+-- 
+-- options.lua
+-- 
+-- Contains options setup and management
+--
+
+
 local addonName, addonTable = ...
 
 -- Set up module
@@ -56,7 +63,7 @@ local function createOptionsTable()
 						max = 100,
 						step = 1,
 						name = "Min Parses Per Player/Fight",
-						desc = "The minimum number of parses to keep for a specific player and fight. These parses will not be removed even if they are older than the max parse age.",
+						desc = "The minimum number of parses to keep for a specific player, spec and fight. These parses will not be removed even if they are older than the max parse age.",
 						disabled = function() return not addon.db.realm.options.purgeEnabled; end,
 					}
 				},
@@ -85,6 +92,22 @@ end
 
 function options:ShowOptionsFrame()
 	InterfaceOptionsFrame_OpenToCategory(self.optionsFrame);
+end
+
+--
+-- Helper Methods for accessing db option properties
+--
+
+function options:GetPurgeEnabled()
+	return addon.db.realm.options["purgeEnabled"];
+end
+
+function options:GetPurgeMaxParseAge()
+	return addon.db.realm.options["purgeMaxParseAge"];
+end
+
+function options:GetPurgeMinPlayerParsesPerFight()
+	return addon.db.realm.options["purgeMinPlayerParsesPerFight"];
 end
 
 function options:OnEnable()

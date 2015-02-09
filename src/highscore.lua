@@ -39,10 +39,13 @@ addon.dbDefaults.realm.modules["highscore"] = {
 											role 		 = "",
 											specName 	 = "",
 											itemLevel 	 = 0,
-											damage 		 = 0,
-											healing 	 = 0,
+											(damage)	 = 0,
+											(healing) 	 = 0,
 											groupParseId = ""
 										}
+										NOTE:
+										damage is included for role TANK or DAMAGER.
+										healing is included for role HEALER.
 									--]]
 									playerParses = {}
 								}
@@ -90,8 +93,6 @@ addon.dbDefaults.realm.modules["highscore"] = {
 	}
 }
 
-addon.dbVersion = addon.dbVersion + 6;
-
 -- Constants
 local TRACKED_ZONE_IDS = {
 	994, -- Highmaul
@@ -122,8 +123,11 @@ local function getReturnableParse(db, parse)
 	parseCopy["dps"] = 0;
 	parseCopy["hps"] = 0;
 	if parseCopy["duration"] > 0 then
-		parseCopy["dps"] = parseCopy["damage"] / parseCopy["duration"];
-		parseCopy["hps"] = parseCopy["healing"] / parseCopy["duration"];
+		if parseCopy["role"] == "DAMAGER" or parseCopy["role"] == "TANK" then
+			parseCopy["dps"] = parseCopy["damage"] / parseCopy["duration"];
+		elseif parseCopy["role"] == "HEALER" then
+			parseCopy["hps"] = parseCopy["healing"] / parseCopy["duration"];
+		end
 	end
 
 	return parseCopy;
@@ -184,10 +188,18 @@ local function addEncounterParseForPlayer(parsesTable, player, groupParseId)
 		role 		 = player.role,
 		specName 	 = player.specName,
 		itemLevel 	 = player.itemLevel,
-		damage 		 = player.damage,
-		healing 	 = player.healing,
 		groupParseId = groupParseId
 	}
+
+	-- Only store damage for dps/tanks and only healing for healers
+	if player.role == "DAMAGER" or player.role == "TANK" then
+		parse.damage = player.damage;
+	elseif player.role == "HEALER" then
+		parse.healing = player.healing;
+	else
+		return;
+	end
+
 	tinsert(parsesTable, parse);
 end
 

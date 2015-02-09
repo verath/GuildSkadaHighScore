@@ -48,12 +48,47 @@ local function migrate8to9(db)
 			end
 		end
 	end
+
 	return 9;
+end
+
+
+local function migrate9to10(db)
+	-- Removed data not used by roles.
+	-- * No longer storing damage done by healers.
+	-- * No longer storing healing done by dps/tanks.
+	-- * Parses must have a valid role (dps, heal, tank).
+	--
+	-- These changes were all made to remove data that is
+	-- not used.
+
+	local highscoreDb = db.realm.modules["highscore"];
+
+	for _, guildData in pairs(highscoreDb.guilds) do
+		for _, zoneData in pairs(guildData.zones) do
+			for _, diffData in pairs(zoneData.difficulties) do
+				for _, encData in pairs(diffData.encounters) do
+					for id, parse in pairs(encData.playerParses) do
+						if parse.role == "DAMAGER" or parse.role == "TANK" then
+							parse.healing = nil;
+						elseif parse.role == "HEALER" then
+							parse.damage = nil;
+						else
+							encData.playerParses[id] = nil;
+						end
+					end
+				end
+			end
+		end
+	end
+
+	return 10;
 end
 
 local migrateTable = {
 	[7] = migrate7to8,
-	[8] = migrate8to9
+	[8] = migrate8to9,
+	[9] = migrate9to10
 }
 
 local function resetDb()

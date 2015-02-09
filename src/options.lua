@@ -11,7 +11,6 @@ addon.dbDefaults.realm.options = {
 	purgeMaxParseAge = 30,
 	purgeMinPlayerParsesPerFight = 2,
 }
-addon.dbVersion = addon.dbVersion + 0;
 
 local optionsTable;
 local function createOptionsTable()

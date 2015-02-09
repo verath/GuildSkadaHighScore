@@ -38,9 +38,9 @@ addon.dbDefaults = {
 	},
 }
 
--- The current db version. Clear (migrate?) the database if 
+-- The current db version. Migrate the database if 
 -- version of database doesn't match this version.
-addon.dbVersion = 3;
+addon.dbVersion = 10;
 
 -- Constants
 DEBUG_PRINT = false;

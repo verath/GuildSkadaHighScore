@@ -196,6 +196,15 @@ function addon:OnEnable()
 
 	self:UpdateMyGuildName();
 	self:UpdateCurrentZone();
+
+	if self.options:GetPurgeEnabled() then
+		local maxDaysAge = self.options:GetPurgeMaxParseAge();
+		local olderThanDate = time() - (maxDaysAge * 24 * 60 * 60);
+		local minPlayerParsesPerFight = self.options:GetPurgeMinPlayerParsesPerFight();
+
+		self:Debug("Purging old parses", olderThanDate, minPlayerParsesPerFight);
+		self.highscore:PurgeParses(olderThanDate, minPlayerParsesPerFight);
+	end
 end
 
 function addon:OnDisable()

@@ -92,7 +92,7 @@ local migrateTable = {
 }
 
 local function resetDb()
-	self:Debug("Resetting db");
+	addon:Debug("Resetting db");
 	addon.db:ResetDB();
 end
 

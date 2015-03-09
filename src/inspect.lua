@@ -182,7 +182,7 @@ function inspect:QueueInspect(player, callback)
 end
 
 -- Attempts to set fields on the player object by using
--- cached data from the inspectCage. Returns true if data
+-- cached data from the inspectCache. Returns true if data
 -- was available and not expired. False if no data could be
 -- found or the data was expired. Note that data will be added
 -- to the player object even if the data is expired.
@@ -271,7 +271,7 @@ function inspect:ResolveInspect(playerId, success)
 	self:Debug("ResolveInspect", player.name, (success and "success" or "fail"))
 
 	if success then 
-		if not hasPlayerInspectCache(player.id) then
+		if not hasPlayerInspectCache(player.id, false) then
 			local specName = getTalentSpec(player.name);
 			local itemLevel = getItemLevel(player.name);
 			setPlayerInspectCache(player.id, specName, itemLevel);

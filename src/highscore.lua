@@ -96,8 +96,9 @@ addon.dbDefaults.realm.modules["highscore"] = {
 
 -- Constants
 local TRACKED_ZONE_IDS = {
-	994, -- Highmaul
-	988 -- Blackrock Foundry
+	994, 	-- Highmaul
+	988, 	-- Blackrock Foundry
+	1026 	-- Hellfire Citadel
 }
 
 -- Function that returns a list of keys in `parses` for the top

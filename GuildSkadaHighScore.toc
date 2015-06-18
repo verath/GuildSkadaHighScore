@@ -1,4 +1,4 @@
-## Interface: 60100
+## Interface: 60200
 ## Author: Verath (Peter Eliasson) 
 ## Version: @project-version@
 ## Title: Guild Skada High Score

@@ -1,3 +1,4 @@
-Version 1.0.1
+Version 1.0.2
 
-* Fix for lua error on login (Ticket #2).
+* Version bump for 6.2.
+* Added Hellfire Citadel to tracked raids. 

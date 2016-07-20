@@ -1,4 +1,3 @@
-Version 1.0.2
+Version 1.1.0-alpha
 
-* Version bump for 6.2.
-* Added Hellfire Citadel to tracked raids. 
+* Version bump for 7.0

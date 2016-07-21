@@ -241,6 +241,8 @@ end
 -- Tries to pre-inspect all guild members of a raid group
 -- to populate the inspectCache for the players.
 function inspect:PreInspectGroup()
+	self:Debug("PreInspectGroup")
+
 	for i=1, GetNumGroupMembers() do
 
 		local playerName = GetRaidRosterInfo(i);

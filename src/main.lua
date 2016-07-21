@@ -84,14 +84,18 @@ function addon:UpdateMyGuildName()
 	else
 		self.guildName = nil
 	end
+
+	self:Debug("UpdateMyGuildName", self.guildName)
 end
 
 -- Sets the current zone to the zone the player
 -- is currently in.
 function addon:UpdateCurrentZone()
-	local zoneId, _ = GetCurrentMapAreaID()
+	local _, _, _, _, _, _, _, zoneId = GetInstanceInfo();
 	local zoneName = GetRealZoneText();
 	self.currentZone = {id = zoneId, name = zoneName};
+
+	self:Debug("UpdateCurrentZone", zoneId, zoneName)
 end
 
 -- Tests if a player with name playerName is in the same
@@ -139,7 +143,11 @@ function addon:OnEncounterEndSuccess(encounterId, encounterName, difficultyId, r
 
 
 	local function handleParses(success, startTime, duration, players)
-		if not success then return end;
+		if not success then
+			self:Debug("Skipping parse, success was false.");
+			return;
+		end
+
 		encounter.startTime = startTime;
 		encounter.duration = duration;
 

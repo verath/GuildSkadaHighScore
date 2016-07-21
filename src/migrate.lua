@@ -85,10 +85,50 @@ local function migrate9to10(db)
 	return 10;
 end
 
+local function migrate10to11(db)
+	local highscoreDb = db.realm.modules["highscore"];
+
+	-- Switched to using GetInstanceInfo for zone ids
+
+	local translateIds = {
+		[994] = 1228, -- Highmaul
+		[988] = 1205, -- Blackrock Foundry
+		[1026] = 1448, -- Hellfire Citadel
+	}
+
+	for zoneId, zoneData in pairs(highscoreDb.zones) do
+		newId = translateIds[zoneId];
+		if newId then
+			highscoreDb.zones[newId] = zoneData
+			highscoreDb.zones[zoneId] = nil
+		end
+	end
+
+	for _, guildData in pairs(highscoreDb.guilds) do
+		for zoneId, zoneData in pairs(guildData.zones) do
+			newId = translateIds[zoneId];
+			if newId then
+				guildData.zones[newId] = zoneData
+				guildData.zones[zoneId] = nil
+			end
+		end
+	end
+
+	for _, groupData in pairs(highscoreDb.groupParses) do
+		if translateIds[groupData.zoneId] then
+			groupData.zoneId = translateIds[groupData.zoneId]
+		end
+	end
+
+
+	return 11
+end
+
 local migrateTable = {
 	[7] = migrate7to8,
 	[8] = migrate8to9,
-	[9] = migrate9to10
+	[9] = migrate9to10,
+	[10] = migrate10to11
 }
 
 local function resetDb()

@@ -23,6 +23,9 @@ local tinsert = tinsert;
 local floor = floor;
 local wipe = wipe;
 
+-- ItemUpgradeInfo, lib for information about item upgrades applied to items.
+local ItemUpgradeInfo = LibStub("LibItemUpgradeInfo-1.0")
+
 -- Set up module
 local addon = addonTable[1];
 local inspect = addon:NewModule("inspect", "AceEvent-3.0", "AceTimer-3.0")
@@ -95,7 +98,7 @@ local function getItemLevel(unitName)
 			local itemLink = GetInventoryItemLink(unitName, slotId);
 			
 			if itemLink then
-				local _, _, _, itemLevel = GetItemInfo(itemLink)
+				itemLevel = ItemUpgradeInfo:GetUpgradedItemLevel(itemLink)
 				if itemLevel and itemLevel > 0 then
 					numItems = numItems + 1;
 					total = total + itemLevel;

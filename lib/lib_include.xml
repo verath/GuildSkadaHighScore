@@ -1,8 +1,7 @@
 <Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\..\FrameXML\UI.xsd">
 	<Script file="Ace3\LibStub\LibStub.lua"/>
-	
-	<Include file="Ace3\CallbackHandler-1.0\CallbackHandler-1.0.xml"/>
 
+	<Include file="Ace3\CallbackHandler-1.0\CallbackHandler-1.0.xml"/>
 	<Include file="Ace3\AceAddon-3.0\AceAddon-3.0.xml"/>
 	<Include file="Ace3\AceConsole-3.0\AceConsole-3.0.xml"/>
 	<Include file="Ace3\AceDB-3.0\AceDB-3.0.xml"/>
@@ -10,6 +9,8 @@
 	<Include file="Ace3\AceGUI-3.0\AceGUI-3.0.xml"/>
 	<Include file="Ace3\AceHook-3.0\AceHook-3.0.xml"/>
 	<Include file="Ace3\AceTimer-3.0\AceTimer-3.0.xml"/>
-
 	<Include file="Ace3\AceConfig-3.0\AceConfig-3.0.xml"/>
+
+	<!-- http://www.wowace.com/addons/libitemupgradeinfo-1-0/ -->
+	<Include file="LibItemUpgradeInfo-1.0\LibItemUpgradeInfo-1.0.xml" />
 </Ui>

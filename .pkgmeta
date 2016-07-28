@@ -8,3 +8,6 @@ externals:
     lib/Ace3:
         url: svn://svn.wowace.com/wow/ace3/mainline/trunk
         tag: Release-r1151
+    lib/LibItemUpgradeInfo-1.0
+        url: git://git.wowace.com/wow/libitemupgradeinfo-1-0/mainline.git
+        tag: Release-70000-24

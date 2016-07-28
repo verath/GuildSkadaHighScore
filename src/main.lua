@@ -101,9 +101,12 @@ end
 -- Tests if a player with name playerName is in the same
 -- guild as the player running this addon.
 function addon:IsInMyGuild(playerName)
-	if self.guildName then
+	if UnitIsUnit(playerName, "player") then
+		-- We are always in our own guild
+		return true
+	elseif self.guildName then
 		local guildName, _, _ = GetGuildInfo(playerName)
-		return guildName == self.guildName
+		return (guildName == self.guildName);
 	else
 		return false
 	end

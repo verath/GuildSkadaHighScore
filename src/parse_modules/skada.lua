@@ -25,7 +25,9 @@ function mod:GetPlayersFromSet(skadaSet)
 				id = player.id, 
 				name = player.name, 
 				damage = player.damage,
-				healing = player.healing
+				healing = player.healing,
+				role = player.role,
+				class = player.class
 			};
 			tinsert(players, playerData);
 		end

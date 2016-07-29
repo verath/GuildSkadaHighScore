@@ -4,7 +4,7 @@ Version 1.0.3-beta2
 * Added zone ids for legion raids (The Nighthold and The Emerald Nightmare)
 * Attempt fix for some parses not being added. (If you experience this and would like to help, please pm me on curse!)
 
-For a full list of changes, [see commits GitHub](https://github.com/verath/GuildSkadaHighScore/compare/v1.0.3-beta...v1.0.3-beta2).
+For a full list of changes, [see commits on GitHub](https://github.com/verath/GuildSkadaHighScore/compare/v1.0.3-beta...v1.0.3-beta2).
 
 Version 1.0.3-beta
 

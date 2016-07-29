@@ -1,7 +1,11 @@
 <Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\..\FrameXML\UI.xsd">
-	<Script file="Ace3\LibStub\LibStub.lua"/>
+	<!-- http://www.wowace.com/addons/libstub/ -->
+	<Script file="LibStub\LibStub.lua"/>
 
-	<Include file="Ace3\CallbackHandler-1.0\CallbackHandler-1.0.xml"/>
+	<!-- http://www.wowace.com/addons/callbackhandler/ -->
+	<Include file="CallbackHandler-1.0\CallbackHandler-1.0\CallbackHandler-1.0.xml"/>
+
+	<!-- http://www.wowace.com/addons/ace3/ -->
 	<Include file="Ace3\AceAddon-3.0\AceAddon-3.0.xml"/>
 	<Include file="Ace3\AceConsole-3.0\AceConsole-3.0.xml"/>
 	<Include file="Ace3\AceDB-3.0\AceDB-3.0.xml"/>

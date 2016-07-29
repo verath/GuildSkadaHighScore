@@ -96,9 +96,9 @@ addon.dbDefaults.realm.modules["highscore"] = {
 
 -- Constants
 local TRACKED_ZONE_IDS = {
-	1228, 	-- WoD: Highmaul
-	1205, 	-- WoD: Blackrock Foundry
-	1448, 	-- WoD: Hellfire Citadel
+	1228,	-- WoD: Highmaul
+	1205,	-- WoD: Blackrock Foundry
+	1448,	-- WoD: Hellfire Citadel
 	1088,	-- Legion: The Nighthold
 	1094	-- Legion: The Emerald Nightmare
 }

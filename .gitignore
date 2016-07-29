@@ -1,4 +1,4 @@
-lib/Ace3
-lib/LibItemUpgradeInfo-1.0
-lib/LibStub
-lib/CallbackHandler-1.0
+vendor/Ace3
+vendor/LibItemUpgradeInfo-1.0
+vendor/LibStub
+vendor/CallbackHandler-1.0

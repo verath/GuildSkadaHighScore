@@ -7,5 +7,5 @@
 ## Dependencies:
 ## OptionalDeps: Ace3
 
-lib\lib_include.xml
+vendor\vendor_include.xml
 src\src_include.xml

@@ -9,6 +9,7 @@ ignore:
   - vendor/CallbackHandler-1.0
   - vendor/Ace3
   - vendor/LibItemUpgradeInfo-1.0
+  - vendor/LibGroupInSpecT-1.1
 
 externals:
     vendor/LibStub:

@@ -1,3 +1,8 @@
+Version 1.0.3-beta3
+
+* Change inspect module to be based on [LibGroupInSpecT](http://www.wowace.com/addons/libgroupinspect/), hopefully improving reliability of inspects.
+* Some changes to library handling to improve no-lib usage.
+
 Version 1.0.3-beta2
 
 * Fix incorrect item levels when using upgraded or heirloom items.

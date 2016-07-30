@@ -5,11 +5,7 @@ manual-changelog:
     markup-type: markdown
 
 ignore:
-  - vendor/LibStub
-  - vendor/CallbackHandler-1.0
-  - vendor/Ace3
-  - vendor/LibItemUpgradeInfo-1.0
-  - vendor/LibGroupInSpecT-1.1
+  - vendor
 
 externals:
     vendor/LibStub:

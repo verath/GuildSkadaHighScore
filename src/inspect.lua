@@ -184,15 +184,30 @@ function inspect:GroupInSpecT_Remove(evt, guid)
 	self.playerInfo[guid] = nil;
 end
 
+-- Fires when the player equips or unequips an item. We use this
+-- to update the player's stored item level directly, instead of
+-- waiting for LGIST to "re-inspect" the player
+function inspect:PLAYER_EQUIPMENT_CHANGED(slot, hasItem)
+	local guid = UnitGUID("player");
+
+	self.playerInfo[guid] = self.playerInfo[guid] or {};
+	local playerInfo = self.playerInfo[guid];
+
+    local itemLevel = self:GetItemLevel("player");
+    playerInfo["itemLevel"] = itemLevel or playerInfo["itemLevel"];
+end
+
 function inspect:OnEnable()
 	self.playerInfo = {};
 
 	LGIST.RegisterCallback(self, "GroupInSpecT_Update");
 	LGIST.RegisterCallback(self, "GroupInSpecT_Remove");
 	LGIST.RegisterCallback(self, "GroupInSpecT_InspectReady");
+	self:RegisterEvent("PLAYER_EQUIPMENT_CHANGED");
 end
 
 function inspect:OnDisable()
+	self:UnregisterEvent("PLAYER_EQUIPMENT_CHANGED");
 	LGIST.UnregisterCallback(self, "GroupInSpecT_Update");
 	LGIST.UnregisterCallback(self, "GroupInSpecT_Remove");
 	LGIST.UnregisterCallback(self, "GroupInSpecT_InspectReady");

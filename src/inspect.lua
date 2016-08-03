@@ -35,25 +35,41 @@ local inspect = addon:NewModule("inspect", "AceEvent-3.0", "AceTimer-3.0")
 addon.inspect = inspect;
 
 -- Slots used for calculating item level of a player
-local INVENTORY_SLOT_NAMES = {
-	"HeadSlot","NeckSlot","ShoulderSlot","BackSlot","ChestSlot","WristSlot",
-	"HandsSlot","WaistSlot","LegsSlot","FeetSlot","Finger0Slot","Finger1Slot",
-	"Trinket0Slot","Trinket1Slot","MainHandSlot","SecondaryHandSlot"
+local INVENTORY_SLOT_IDS = {
+	-- INVSLOT_AMMO,
+	INVSLOT_HEAD,
+	INVSLOT_NECK,
+	INVSLOT_SHOULDER,
+	-- INVSLOT_BODY - shirt,
+	INVSLOT_CHEST,
+	INVSLOT_WAIST,
+	INVSLOT_LEGS,
+	INVSLOT_FEET,
+	INVSLOT_WRIST,
+	INVSLOT_HAND,
+	INVSLOT_FINGER1,
+	INVSLOT_FINGER2,
+	INVSLOT_TRINKET1,
+	INVSLOT_TRINKET2,
+	INVSLOT_BACK,
+	INVSLOT_MAINHAND,
+	INVSLOT_OFFHAND,
+	-- INVSLOT_RANGED,
+	-- INVSLOT_TABARD,
 }
 
 
 -- Attempts to get the item level of the provided unitName.
 -- The unitName must either be "player" or a unit currently being
 -- inspected. 
-local function getItemLevel(unitName) 
+function inspect:GetItemLevel(unitName)
 	if unitName == "player" or UnitIsUnit(unitName, "player") then
 		local _, equipped = GetAverageItemLevel();
 		return floor(equipped);
 	else
 		local total, numItems = 0, 0;
-		for i = 1, #INVENTORY_SLOT_NAMES do
-			local slotName = INVENTORY_SLOT_NAMES[i];
-			local slotId = GetInventorySlotInfo(slotName);
+		for i = 1, #INVENTORY_SLOT_IDS do
+			local slotId = INVENTORY_SLOT_IDS[i];
 			local itemLink = GetInventoryItemLink(unitName, slotId);
 			if itemLink then
 				itemLevel = ItemUpgradeInfo:GetUpgradedItemLevel(itemLink)
@@ -138,7 +154,7 @@ function inspect:GroupInSpecT_InspectReady(evt, guid, unit)
 	-- item changes. However, as LGIST might re-inspect players
 	-- frequently, we instead optimize for the case where players 
 	-- do not change their item levels.
-	local itemLevel = getItemLevel(unit);
+	local itemLevel = self:GetItemLevel(unit);
 	if itemLevel then
 		playerInfo["itemLevel"] = itemLevel;
 	end

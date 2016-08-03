@@ -193,8 +193,8 @@ function inspect:PLAYER_EQUIPMENT_CHANGED(slot, hasItem)
 	self.playerInfo[guid] = self.playerInfo[guid] or {};
 	local playerInfo = self.playerInfo[guid];
 
-    local itemLevel = self:GetItemLevel("player");
-    playerInfo["itemLevel"] = itemLevel or playerInfo["itemLevel"];
+	local itemLevel = self:GetItemLevel("player");
+	playerInfo["itemLevel"] = itemLevel or playerInfo["itemLevel"];
 end
 
 function inspect:OnEnable()

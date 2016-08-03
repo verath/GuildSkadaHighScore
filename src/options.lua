@@ -38,6 +38,7 @@ local function createOptionsTable()
 				name = "Purge Settings",
 				type = "group",
 				inline = true,
+				order = 20,
 				args = {
 					purgeEnabled = {
 						order = 1,
@@ -67,7 +68,25 @@ local function createOptionsTable()
 						disabled = function() return not addon.db.realm.options.purgeEnabled; end,
 					}
 				},
-				order = 20,
+			},
+			creditsSeparator = {
+				name = "",
+				order = -1,
+				type = "header",
+				width = "Full",
+			},
+			credits = {
+				name = "Credits",
+				order = -1,
+				type = "group",
+				inline = true,
+				args = {
+					text = {
+						order = 1,
+						type = "description",
+						name = "Big thanks to Zalk for helping me test the addon!",
+					},
+				},
 			},
 		},
 	};

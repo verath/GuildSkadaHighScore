@@ -16,4 +16,4 @@ externals:
         tag: Release-70000-24
     vendor/LibGroupInSpecT-1.1:
         url: svn://svn.wowace.com/wow/libgroupinspect/mainline/trunk
-        # TODO(2016-07-30): Specify release tag once available
+        tag: 1.2.0

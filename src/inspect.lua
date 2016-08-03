@@ -142,7 +142,10 @@ end
 function inspect:GroupInSpecT_InspectReady(evt, guid, unit)
 	-- As getting the itemLevel can be slow, we don't perform this
 	-- action for players that are not currently part of our guild.
-	if not addon:IsInMyGuild(unit) then return end
+	if not addon:IsInMyGuild(unit) then
+		self:Debug("inspect:GroupInSpecT_InspectReady", unit, "is not in our guild");
+		return;
+	end
 
 	self.playerInfo[guid] = self.playerInfo[guid] or {};
 	local playerInfo = self.playerInfo[guid];

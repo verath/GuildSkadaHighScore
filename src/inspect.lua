@@ -124,6 +124,10 @@ end
 -- inspection handling. In our case, we need to try and grab 
 -- the item level here, as that is not provided by LGIST.
 function inspect:GroupInSpecT_InspectReady(evt, guid, unit)
+	-- As getting the itemLevel can be slow, we don't perform this
+	-- action for players that are not currently part of our guild.
+	if not addon:IsInMyGuild(unit) then return end
+
 	self.playerInfo[guid] = self.playerInfo[guid] or {};
 	local playerInfo = self.playerInfo[guid];
 
@@ -144,6 +148,10 @@ end
 
 -- LGIST event for when info for a player is ready or has been modified.
 function inspect:GroupInSpecT_Update(evt, guid, unit, info)
+	-- We do not bother checking guild here, as the expensive operation
+	-- (the inspection) has already been done. Better then to store the
+	-- data, if the player later joins our guild during the raid.
+
 	self.playerInfo[guid] = self.playerInfo[guid] or {};
 	local playerInfo = self.playerInfo[guid];
 

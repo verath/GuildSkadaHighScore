@@ -88,8 +88,8 @@ function inspect:GetItemLevel(unitName)
 end
 
 -- Helper method for getting inspect data for a single player,
--- calling the provided callback on success/error.
-function inspect:GetInspectDataForPlayer(player, callback)
+-- modifying the player object in place.
+function inspect:GetInspectDataForPlayer(player)
 	local playerId = player.id;
 	local playerInfo = self.playerInfo[playerId]
 
@@ -114,26 +114,17 @@ function inspect:GetInspectDataForPlayer(player, callback)
 	else
 		self:Debug("inspect:GetInspectDataForPlayer", "fail");
 	end
-
-	callback()
 end
 
 -- Takes a list of player objects and tries to get inspect data
 -- for all these objects. The player objects are modified in place.
--- The callback is called when attempt for all players has been
+-- The callback is called when attempts for all players have been
 -- performed.
 function inspect:GetInspectDataForPlayers(players, callback)
-	local totalCallbacks = #players;
-	local doneCallbacks = 0;
-
 	for _, player in ipairs(players) do		
-		self:GetInspectDataForPlayer(player, function()
-			doneCallbacks = doneCallbacks + 1;
-			if doneCallbacks == totalCallbacks then
-				callback();
-			end
-		end)
+		self:GetInspectDataForPlayer(player);
 	end
+	callback();
 end
 
 -- LGIST event for INSPECT_READY where we can perform our own 

@@ -1,4 +1,4 @@
-Version 1.0.3
+# Version 1.0.3
 
 **Note:** As of 1.0.3 Recount is no longer supported.
 

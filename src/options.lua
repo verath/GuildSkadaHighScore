@@ -40,6 +40,30 @@ local function createOptionsTable()
 				name = format("Version: %s", addon.versionName),
 				width = "Full",
 			},
+			actions = {
+				name = "Actions",
+				type = "group",
+				inline = true,
+				order = 10,
+				args = {
+					RemoveParses = {
+						order = 10,
+						type = 'execute',
+						name = 'Remove All Parses',
+						desc = 'Removes ALL stored parses.',
+						confirm = function()
+							return 'Are you sure you want to remove ALL stored parses?'
+								.. ' This cannot be undone!';
+						end,
+						func = function()
+							local highscoreDb = addon.highscore:GetDB();
+							highscoreDb = nil;
+							addon:SetupDatabase();
+							addon:Print("All parses have been removed.");
+						end,
+					},
+				},
+			},
 			purgeSettings = {
 				name = "Purge Settings",
 				type = "group",

@@ -122,6 +122,13 @@ function addon:IsInMyGuild(playerName)
 	end
 end
 
+-- Creates the "database" via AceDB
+function addon:SetupDatabase()
+	self.db = LibStub("AceDB-3.0"):New("GuildSkadaHighScoreDB", addon.dbDefaults, true)
+	-- Make sure db version is in sync
+	self.migrate:DoMigration();
+end
+
 -- Method called when ENCOUNTER_END was called and the success
 -- status was true. 
 -- This method uses the parse module to get a list of all valid 
@@ -193,10 +200,7 @@ function addon:ZONE_CHANGED_NEW_AREA(evt)
 end
 
 function addon:OnInitialize()
-	self.db = LibStub("AceDB-3.0"):New("GuildSkadaHighScoreDB", addon.dbDefaults, true)
-	
-	-- Make sure db version is in sync
-	self.migrate:DoMigration();
+	self:SetupDatabase();
 end
 
 function addon:OnEnable()

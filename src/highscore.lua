@@ -262,28 +262,23 @@ end
 function highscore:AddEncounterParsesForPlayers(guildName, encounter, players)
 	local db = self:GetDB()
 
-	local zoneId = encounter.zoneId;
-	local zoneName = encounter.zoneName;
-	local encounterId = encounter.id;
-	local encounterName = encounter.name;
-	local difficultyId = encounter.difficultyId;
-	local difficultyName = encounter.difficultyName;
-	local startTime = encounter.startTime;
-	local duration = encounter.duration;
-
-	assert(guildName)
-	assert(zoneId)
-	assert(zoneName)
-	assert(encounterId)
-	assert(encounterName)
-	assert(difficultyId)
-	assert(difficultyName)
-	assert(startTime)
-	assert(duration)
-	assert(players)
+	-- Theses checks _should_ never fail. Something might fail though,
+	-- so these are here as a final safe-guard against bad data being
+	-- inserted into the db (which could be very hard to fix later on).
+	guildName = assert(guildName);
+	encounter = assert(encounter and type(encounter) == "table");
+	players = assert(players);
+	local zoneId = assert(encounter.zoneId);
+	local zoneName = assert(encounter.zoneName);
+	local encounterId = assert(encounter.id);
+	local encounterName = assert(encounter.name);
+	local difficultyId = assert(encounter.difficultyId);
+	local difficultyName = assert(encounter.difficultyName);
+	local startTime = assert(encounter.startTime);
+	local duration = assert(encounter.duration);
 
 	if not tContains(TRACKED_ZONE_IDS, zoneId) then
-		self:Debug("AddEncounterParsesForPlayers: Current zone not not in tracked zones");
+		self:Debug("AddEncounterParsesForPlayers: Current zone not in tracked zones");
 		return
 	end
 

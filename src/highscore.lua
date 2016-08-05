@@ -445,7 +445,7 @@ end
 -- Removes parses that is older than "olderThanDate". If minParsesPerPlayer
 -- is > 0, that many parses will be kept for the player/encounter combination.
 function highscore:PurgeParses(olderThanDate, minParsesPerPlayer)
-	local db = addon.db.realm.modules["highscore"];
+	local db = self:GetDB();
 	local oldGroupParseIds = {};
 
 	for id, groupParse in pairs(db.groupParses) do

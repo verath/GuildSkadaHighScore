@@ -43,7 +43,7 @@ addon.dbDefaults = {
 }
 
 -- Constants
-DEBUG_PRINT = false;
+local DEBUG_PRINT = false
 --@debug@
 DEBUG_PRINT = true;
 --@end-debug@

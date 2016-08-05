@@ -20,11 +20,17 @@
 
 local addonName, addonTable = ...
 
--- Global functions for faster access
+-- Cached globals
 local floor = floor;
+local ipairs = ipairs;
+local UnitIsUnit = UnitIsUnit;
+local UnitGUID = UnitGUID;
+local GetAverageItemLevel = GetAverageItemLevel;
+local GetInventoryItemLink = GetInventoryItemLink;
+
 
 -- LibGroupInSpecT, lib handling inspection of group members
-local LGIST = LibStub:GetLibrary("LibGroupInSpecT-1.1")
+local LGIST = LibStub("LibGroupInSpecT-1.1")
 
 -- ItemUpgradeInfo, lib for information about item upgrades applied to items.
 local ItemUpgradeInfo = LibStub("LibItemUpgradeInfo-1.0")
@@ -72,7 +78,7 @@ function inspect:GetItemLevel(unitName)
 			local slotId = INVENTORY_SLOT_IDS[i];
 			local itemLink = GetInventoryItemLink(unitName, slotId);
 			if itemLink then
-				itemLevel = ItemUpgradeInfo:GetUpgradedItemLevel(itemLink)
+				local itemLevel = ItemUpgradeInfo:GetUpgradedItemLevel(itemLink)
 				if itemLevel and itemLevel > 0 then
 					numItems = numItems + 1;
 					total = total + itemLevel;
@@ -105,6 +111,7 @@ function inspect:GetInspectDataForPlayer(player)
 		player["itemLevel"] = playerInfo["itemLevel"];
 
 		-- Add role from spec if role is not already a valid role
+		local role = player["role"];
 		if not (role == "TANK" or role == "HEALER" or role == "DAMAGER") then
 			player["role"] = playerInfo["specRole"];
 		end

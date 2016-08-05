@@ -13,8 +13,11 @@
 local addonName, addonTable = ...
 local addon = addonTable[1];
 
--- Global functions for faster access
-local tinsert = tinsert;
+-- Cached globals
+local ipairs = ipairs;
+local UnitClass = UnitClass;
+local UnitGroupRolesAssigned = UnitGroupRolesAssigned;
+
 
 -- Create the parseModulesCore
 local pmc = addon:NewModule("parseModulesCore")

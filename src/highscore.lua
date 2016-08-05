@@ -10,13 +10,17 @@
 
 local addonName, addonTable = ...
 
--- Global functions for faster access
+-- Cached globals
 local tinsert = tinsert;
 local tContains = tContains;
 local tremove = tremove;
 local sort = sort;
 local random = random;
 local format = format;
+local ipairs = ipairs;
+local pairs = pairs;
+local assert = assert;
+
 
 -- Set up module
 local addon = addonTable[1];

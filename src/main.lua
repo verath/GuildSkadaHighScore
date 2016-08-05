@@ -10,8 +10,18 @@
 
 local addonName, addonTable = ...
 
+-- Cached globals
 local tinsert = tinsert;
-local tremove = tremove;
+local format = format;
+local time = time;
+local IsInGuild = IsInGuild;
+local GetGuildInfo = GetGuildInfo;
+local GetInstanceInfo = GetInstanceInfo;
+local GetRealZoneText = GetRealZoneText;
+local UnitIsUnit = UnitIsUnit;
+
+-- Non-cached globals (for mikk's FindGlobals script)
+-- GLOBALS: LibStub
 
 -- Create ACE3 addon
 local addon = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0", "AceEvent-3.0")

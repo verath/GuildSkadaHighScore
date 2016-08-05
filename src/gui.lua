@@ -7,9 +7,20 @@
 
 local addonName, addonTable = ...
 
--- Global functions for faster access
+-- Cached globals
 local tinsert = tinsert;
-local tContains = tContains;
+local floor = floor;
+local pairs = pairs;
+local unpack = unpack;
+local date = date;
+local ipairs = ipairs;
+local format = format;
+local wipe = wipe;
+local next = next;
+
+-- Non-cached globals (for mikk's FindGlobals script)
+-- GLOBALS: Skada, RAID_CLASS_COLORS
+
 
 -- Set up module
 local addon = addonTable[1];

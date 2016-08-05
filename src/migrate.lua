@@ -6,8 +6,11 @@
 
 local addonName, addonTable = ...
 
--- Global functions for faster access
+-- Cached globals
 local tinsert = tinsert;
+local pairs = pairs;
+local format = format;
+
 
 -- Set up module
 local addon = addonTable[1];
@@ -97,7 +100,7 @@ local function migrate10to11(db)
 	}
 
 	for zoneId, zoneData in pairs(highscoreDb.zones) do
-		newId = translateIds[zoneId];
+		local newId = translateIds[zoneId];
 		if newId then
 			highscoreDb.zones[newId] = zoneData
 			highscoreDb.zones[zoneId] = nil
@@ -106,7 +109,7 @@ local function migrate10to11(db)
 
 	for _, guildData in pairs(highscoreDb.guilds) do
 		for zoneId, zoneData in pairs(guildData.zones) do
-			newId = translateIds[zoneId];
+			local newId = translateIds[zoneId];
 			if newId then
 				guildData.zones[newId] = zoneData
 				guildData.zones[zoneId] = nil

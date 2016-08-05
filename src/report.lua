@@ -11,6 +11,16 @@ local addonName, addonTable = ...
 -- Global functions for faster access
 local format = format;
 local tinsert = tinsert;
+local date = date;
+local pairs = pairs;
+local ipairs = ipairs;
+local min = min;
+local strupper = strupper;
+local SendChatMessage = SendChatMessage;
+local IsInGroup = IsInGroup;
+local IsInRaid = IsInRaid;
+local IsInGuild = IsInGuild;
+
 
 -- Set up module
 local addon = addonTable[1];
@@ -86,7 +96,7 @@ local function createFilterString(filters)
 		if filterKey == "name" then
 			filterString = filterString .. format("Name: %s", filterValue);
 		elseif filterKey == "startTime" then
-			filterString = filterString .. format("Time: %s", date(FILTER_TIME_FORMAT, filterValue));
+			filterString = filterString .. format("Time: %s", date(FILTER_START_TIME_FORMAT, filterValue));
 		else
 			filterString = filterString .. format("%s: %s", filterKey, filterValue);
 		end
@@ -112,7 +122,7 @@ end
 -- and filterString included.
 function report:SendData(channelId, whisperToName, dataTitle, filterString, parses, numParses)
 	numParses = min(numParses, MAX_PARSES_TO_SEND);
-	channelId = string.upper(channelId);
+	channelId = strupper(channelId);
 
 	local lines = {"-- Guild Skada High Score --", dataTitle};
 

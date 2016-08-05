@@ -7,6 +7,12 @@
 
 local addonName, addonTable = ...
 
+-- Cached globals
+local format = format;
+
+-- Non-cached globals (for mikk's FindGlobals script)
+-- GLOBALS: LibStub, InterfaceOptionsFrame_OpenToCategory
+
 -- Set up module
 local addon = addonTable[1];
 local options = addon:NewModule("options");

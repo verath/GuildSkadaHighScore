@@ -8,6 +8,12 @@ if not mod then return end;
 -- Global functions
 local wipe = wipe;
 local tinsert = tinsert;
+local ipairs = ipairs;
+local next = next;
+local IsAddOnLoaded = IsAddOnLoaded;
+
+-- Non-cached globals (for mikk's FindGlobals script)
+-- GLOBALS: Skada
 
 
 function mod:IsActivatable()

@@ -29,18 +29,18 @@ addon.versionName = '0.0.0-debug';
 local modPrototype = { Debug = function(self, ...) addon:Debug(...) end }
 addon:SetDefaultModulePrototype(modPrototype)
 
+-- The current db version. Migrate the database if 
+-- version of database doesn't match this version.
+addon.dbVersion = 11;
+
 -- Db default settings
 addon.dbDefaults = {
 	realm = {
 		modules = {},
 		options = {},
-		dbVersion = 1
+		dbVersion = addon.dbVersion
 	},
 }
-
--- The current db version. Migrate the database if 
--- version of database doesn't match this version.
-addon.dbVersion = 11;
 
 -- Constants
 DEBUG_PRINT = false;

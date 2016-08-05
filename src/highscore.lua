@@ -260,6 +260,8 @@ local function addEncounterParseForPlayer(parsesTable, player, groupParseId)
 end
 
 function highscore:AddEncounterParsesForPlayers(guildName, encounter, players)
+	local db = self:GetDB()
+
 	local zoneId = encounter.zoneId;
 	local zoneName = encounter.zoneName;
 	local encounterId = encounter.id;
@@ -286,20 +288,20 @@ function highscore:AddEncounterParsesForPlayers(guildName, encounter, players)
 	end
 
 	-- Add zone, difficulty and encounter info
-	addZone(self.db, zoneId, zoneName);
-	addDifficulty(self.db, difficultyId, difficultyName);
-	addEncounter(self.db, encounterId, encounterName);
+	addZone(db, zoneId, zoneName);
+	addDifficulty(db, difficultyId, difficultyName);
+	addEncounter(db, encounterId, encounterName);
 
 	-- Add a group parse entry, holding data shared between all players
-	local groupParseId = addGroupParse(self.db, startTime, duration, 
-		guildName, zoneId, difficultyId, encounterId);
+	local groupParseId = addGroupParse(db, startTime, duration, guildName,
+		zoneId, difficultyId, encounterId);
 
-	local parsesTable = getParsesTable(self.db, guildName, zoneId, difficultyId, encounterId);
+	local parsesTable = getParsesTable(db, guildName, zoneId, difficultyId, encounterId);
 
 	for _, player in ipairs(players) do
 		self:Debug(format("addEncounterParseForPlayer: %s", player.name));
 
-		addPlayer(self.db, player.id, player.name, player.class);
+		addPlayer(db, player.id, player.name, player.class);
 		addEncounterParseForPlayer(parsesTable, player, groupParseId)
 	end
 
@@ -307,6 +309,8 @@ end
 
 -- Returns (array of parses, numParses)
 function highscore:GetParses(guildName, zoneId, difficultyId, encounterId, role, sortBy)
+	local db = self:GetDB();
+
 	if (role ~= "TANK" and role ~= "HEALER" and role ~= "DAMAGER") then
 		return {}, 0;
 	end
@@ -319,14 +323,14 @@ function highscore:GetParses(guildName, zoneId, difficultyId, encounterId, role,
 		end
 	end
 
-	local parsesTable = getParsesTable(self.db, guildName, zoneId, difficultyId, encounterId);
+	local parsesTable = getParsesTable(db, guildName, zoneId, difficultyId, encounterId);
 
 	-- Get a *copy* of all parses for the specified role
 	local parses = {};
 	local numParses = 0;
 	for _, parse in ipairs(parsesTable) do
 		if parse.role == role then
-			local parseCopy = getReturnableParse(self.db, parse);
+			local parseCopy = getReturnableParse(db, parse);
 			tinsert(parses, parseCopy);
 			numParses = numParses + 1;
 		end
@@ -344,12 +348,13 @@ function highscore:GetEncounters(guildName, zoneId, difficultyId)
 		return {}, 0;
 	end
 
+	local db = self:GetDB();
 	local encounters = {};
 	local numEncounters = 0;
-	local difficultiesTable = self.db.guilds[guildName].zones[zoneId].difficulties;
+	local difficultiesTable = db.guilds[guildName].zones[zoneId].difficulties;
 
 	for encounterId, _ in pairs(difficultiesTable[difficultyId].encounters) do
-		local encounterName = self.db.encounters[encounterId].encounterName;
+		local encounterName = db.encounters[encounterId].encounterName;
 		encounters[encounterId] = encounterName;
 		numEncounters = numEncounters + 1;
 	end
@@ -362,12 +367,13 @@ function highscore:GetDifficulties(guildName, zoneId)
 		return {}, 0;
 	end
 
+	local db = self:GetDB();
 	local difficulties = {};
 	local numDifficulties = 0;
-	local difficultiesTable = self.db.guilds[guildName].zones[zoneId].difficulties;
+	local difficultiesTable = db.guilds[guildName].zones[zoneId].difficulties;
 
 	for difficultyId, _ in pairs(difficultiesTable) do
-		local difficultyName = self.db.difficulties[difficultyId].difficultyName;
+		local difficultyName = db.difficulties[difficultyId].difficultyName;
 		difficulties[difficultyId] = difficultyName;
 		numDifficulties = numDifficulties + 1;
 	end
@@ -380,10 +386,11 @@ function highscore:GetZones(guildName)
 		return {}, 0;
 	end
 
+	local db = self:GetDB();
 	local zones = {};
 	local numZones = 0;
-	for zoneId, _ in pairs(self.db.guilds[guildName].zones) do
-		local zoneName = self.db.zones[zoneId].zoneName;
+	for zoneId, _ in pairs(db.guilds[guildName].zones) do
+		local zoneName = db.zones[zoneId].zoneName;
 		zones[zoneId] = zoneName;
 		numZones = numZones + 1;
 	end
@@ -392,9 +399,10 @@ end
 
 -- Returns (array of {guildId => guildName}, numGuilds)
 function highscore:GetGuilds()
+	local db = self:GetDB();
 	local guildNames = {};
 	local numGuilds = 0;
-	for guildName, _ in pairs(self.db.guilds) do
+	for guildName, _ in pairs(db.guilds) do
 		-- Actually guildId == guildName
 		guildNames[guildName] = guildName;
 		numGuilds = numGuilds + 1;
@@ -405,19 +413,22 @@ end
 -- Returns the name stored for the encounter id, or nil
 -- if no encounters with that id.
 function highscore:GetEncounterNameById(encounterId)
-	return self.db.encounters[encounterId].encounterName;
+	local db = self:GetDB();
+	return db.encounters[encounterId].encounterName;
 end
 
 -- Returns the name stored for the difficulty id, or nil
 -- if no difficulty with that id.
 function highscore:GetDifficultyNameById(difficultyId)
-	return self.db.difficulties[difficultyId].difficultyName;
+	local db = self:GetDB();
+	return db.difficulties[difficultyId].difficultyName;
 end
 
 -- Returns the name stored for the zone id, or nil
 -- if no zone with that id.
 function highscore:GetZoneNameById(zoneId)
-	return self.db.zones[zoneId].zoneName;
+	local db = self:GetDB();
+	return db.zones[zoneId].zoneName;
 end
 
 -- Returns the name stored for the guild id, or nil
@@ -480,10 +491,6 @@ function highscore:PurgeParses(olderThanDate, minParsesPerPlayer)
 	end
 end
 
-function highscore:OnEnable()
-	self.db = addon.db.realm.modules["highscore"];
-end
-
-function highscore:OnDisable()
-	self.db = nil;
+function highscore:GetDB()
+	return addon.db.realm.modules["highscore"];
 end

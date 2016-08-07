@@ -98,35 +98,29 @@ end
 -- Tests if a player with name playerName is in the same
 -- guild as the player running this addon.
 function addon:IsInMyGuild(playerName)
+	if not IsInGuild() then
+		return false;
+	end
+
 	if UnitIsUnit(playerName, "player") then
 		-- We are always in our own guild
-		return true
-	elseif self.guildName then
-		local guildName, _, _ = GetGuildInfo(playerName)
-		return (guildName == self.guildName);
-	else
-		return false
+		return true;
 	end
+
+	local relation = UnitRealmRelationship(playerName)
+	if not (relation == LE_REALM_RELATION_SAME or relation == LE_REALM_RELATION_VIRTUAL) then
+		-- A player not on the same (connected) realm cannot be in our guild
+		return false;
+	end
+
+	local myGuildName, _, _, myGuildRealm = GetGuildInfo("player");
+	local otherGuildName, _, _, otherGuildRealm = GetGuildInfo(playerName);
+	return (myGuildName == otherGuildName and myGuildRealm == otherGuildRealm);
 end
 
 -- Tests if a zone is in the addon's tracked zones.
 function addon:IsTrackedZone(zoneId)
 	return tContains(self.trackedZones, zoneId);
-end
-
--- Function that updates the guild name of the player
--- by quering the GetGuildInfo method for the player.
-function addon:UpdateMyGuildName()
-	if IsInGuild() then
-		local guildName, _, _ = GetGuildInfo("player")
-		if guildName ~= nil then
-			self.guildName = guildName
-		end
-	else
-		self.guildName = nil
-	end
-
-	self:Debug("UpdateMyGuildName", self.guildName)
 end
 
 -- Creates the "database" via AceDB
@@ -152,9 +146,14 @@ function addon:OnEncounterEndSuccess(encounterId, encounterName, difficultyId, r
 		return;
 	end
 
-	local guildName = self.guildName;
-	if not guildName then
+	if not IsInGuild() then
 		self:Debug("Not in a guild");
+		return;
+	end
+
+	local guildName = GetGuildInfo("player");
+	if not guildName then
+		self:Debug("Could not get the guild name of the player")
 		return;
 	end
 
@@ -196,12 +195,6 @@ function addon:OnEncounterEndSuccess(encounterId, encounterName, difficultyId, r
 	end);
 end
 
-function addon:PLAYER_GUILD_UPDATE(evt, unitId)
-	if unitId == "player" then
-		self:UpdateMyGuildName()
-	end
-end
-
 function addon:ENCOUNTER_END(evt, encounterId, encounterName, difficultyId, raidSize, endStatus)
 	self:Debug("ENCOUNTER_END", encounterId, encounterName, difficultyId, raidSize, endStatus)
 	if endStatus == 1 then 
@@ -216,11 +209,8 @@ end
 
 function addon:OnEnable()
 	self.trackedZones = getRaidZonesByExpansionId(GetExpansionLevel())
-	self.guildName = nil;
 
 	self:RegisterEvent("ENCOUNTER_END")	
-	self:RegisterEvent("PLAYER_GUILD_UPDATE")
-
 	self:RegisterChatCommand("gshs", function(arg)
 		if arg == "config" then
 			self.options:ShowOptionsFrame();
@@ -228,8 +218,6 @@ function addon:OnEnable()
 			self.gui:ShowMainFrame();
 		end
 	end)
-
-	self:UpdateMyGuildName();
 
 	if self.options:GetPurgeEnabled() then
 		local maxDaysAge = self.options:GetPurgeMaxParseAge();
@@ -243,10 +231,7 @@ end
 
 function addon:OnDisable()
 	self.trackedZones = nil;
-	self.guildName = nil;
 
 	self:UnregisterEvent("ENCOUNTER_END")
-	self:UnregisterEvent("PLAYER_GUILD_UPDATE")
-	
 	self:UnregisterChatCommand("gshs");
 end

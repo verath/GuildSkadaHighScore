@@ -199,8 +199,9 @@ function addon:OnEncounterEndSuccess(encounterId, encounterName, difficultyId, r
 		raidSize = raidSize
 	};
 
-
-	local function handleParses(success, startTime, duration, players)
+	-- Get parses from the parse provider
+	local pmc = self.parseModulesCore;
+	pmc:GetParsesForEncounter(encounter, function(success, startTime, duration, players)
 		if not success then
 			self:Debug("Skipping parse, success was false.");
 			return;
@@ -212,11 +213,7 @@ function addon:OnEncounterEndSuccess(encounterId, encounterName, difficultyId, r
 		addon.inspect:GetInspectDataForPlayers(players, function()
 			addon.highscore:AddEncounterParsesForPlayers(guildName, encounter, players);
 		end);
-	end
-
-	-- Get parses from the parse provider
-	local pmc = self.parseModulesCore;
-	pmc:GetParsesForEncounter(encounter, handleParses);
+	end);
 end
 
 function addon:PLAYER_GUILD_UPDATE(evt, unitId)

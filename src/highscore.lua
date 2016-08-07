@@ -98,14 +98,6 @@ addon.dbDefaults.realm.modules["highscore"] = {
 	}
 }
 
--- Constants
-local TRACKED_ZONE_IDS = {
-	1228,	-- WoD: Highmaul
-	1205,	-- WoD: Blackrock Foundry
-	1448,	-- WoD: Hellfire Citadel
-	1088,	-- Legion: The Nighthold
-	1094	-- Legion: The Emerald Nightmare
-}
 
 -- Function that returns a list of keys in `parses` for the top
 -- `numParses` for each player and role combination in `parses`.
@@ -276,11 +268,6 @@ function highscore:AddEncounterParsesForPlayers(guildName, encounter, players)
 	local difficultyName = assert(encounter.difficultyName);
 	local startTime = assert(encounter.startTime);
 	local duration = assert(encounter.duration);
-
-	if not tContains(TRACKED_ZONE_IDS, zoneId) then
-		self:Debug("AddEncounterParsesForPlayers: Current zone not in tracked zones");
-		return
-	end
 
 	-- Add zone, difficulty and encounter info
 	addZone(db, zoneId, zoneName);

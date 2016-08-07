@@ -14,11 +14,13 @@ local addonName, addonTable = ...
 local tinsert = tinsert;
 local format = format;
 local time = time;
+local tContains = tContains;
 local IsInGuild = IsInGuild;
 local GetGuildInfo = GetGuildInfo;
 local GetInstanceInfo = GetInstanceInfo;
 local GetRealZoneText = GetRealZoneText;
 local UnitIsUnit = UnitIsUnit;
+local GetExpansionLevel = GetExpansionLevel;
 
 -- Non-cached globals (for mikk's FindGlobals script)
 -- GLOBALS: LibStub
@@ -61,6 +63,20 @@ local DEBUG_PRINT = false
 DEBUG_PRINT = true;
 --@end-debug@
 
+-- A list of raid zone ids, grouped by expansion id. This list
+-- is used to determine if parses for a zone should be added.
+local RAID_ZONE_IDS = {
+	[5] = { -- WoD
+		1228, -- Highmaul
+		1205, -- Blackrock Foundry
+		1448, -- Hellfire Citadel
+	},
+	[6] = { -- Legion
+		1088, -- The Nighthold
+		1094, -- The Emerald Nightmare
+	},
+}
+
 
 -- Takes a difficulty ID and attempts to return a string
 -- representation of that difficulty.
@@ -77,6 +93,13 @@ local function getDifficultyNameById(difficultyId)
 
 	return nil
 end
+
+-- Takes an expansionId and returns the raid zone ids for that
+-- expansion, or an empty table for unknown expansionIds
+local function getRaidZonesByExpansionId(expansionId)
+	return RAID_ZONE_IDS[expansionId] or {};
+end
+
 
 -- A wrapper around :Pring that only prints if the
 -- DEBUG_PRINT flag is set to true.
@@ -98,6 +121,11 @@ function addon:IsInMyGuild(playerName)
 	else
 		return false
 	end
+end
+
+-- Tests if a zone is in the addon's tracked zones.
+function addon:IsTrackedZone(zoneId)
+	return tContains(self.trackedZones, zoneId);
 end
 
 -- Function that updates the guild name of the player
@@ -154,9 +182,16 @@ function addon:OnEncounterEndSuccess(encounterId, encounterName, difficultyId, r
 		return;
 	end
 
+	local zoneId = self.currentZone.id;
+	local zoneName = self.currentZone.name;
+	if not self:IsTrackedZone(zoneId) then
+		self:Debug("Not in a tracked zone");
+		return;
+	end
+
 	local encounter = {
-		zoneId = self.currentZone.id,
-		zoneName = self.currentZone.name,
+		zoneId = zoneId,
+		zoneName = zoneName,
 		id = encounterId,
 		name = encounterName,
 		difficultyId = difficultyId,
@@ -207,6 +242,7 @@ function addon:OnInitialize()
 end
 
 function addon:OnEnable()
+	self.trackedZones = getRaidZonesByExpansionId(GetExpansionLevel())
 	self.currentZone = {};
 	self.guildName = nil;
 
@@ -236,7 +272,8 @@ function addon:OnEnable()
 end
 
 function addon:OnDisable()
-	self.currentZone = {};
+	self.trackedZones = nil;
+	self.currentZone = nil;
 	self.guildName = nil;
 
 	self:UnregisterEvent("ENCOUNTER_END")

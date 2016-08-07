@@ -572,7 +572,7 @@ function gui:ShowMainFrame()
 			local myGuildName = addon:GetGuildName("player");
 			for guildId in pairs(addon.highscore:GetGuilds()) do
 				if guildId == myGuildName then
-					gui:SetSelectedGuild(addon.guildName);
+					gui:SetSelectedGuild(guildId);
 					break;
 				end
 			end

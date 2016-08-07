@@ -160,6 +160,11 @@ function migrate:DoMigration()
 	self:Debug(format("Attempting to migrate from dbVersion: %d to %d.", 
 		currentVersion, targetVersion));
 
+	if currentVersion > targetVersion then
+		self:Debug(format("Could not migrate from dbVersion: %d!", currentVersion));
+		resetDb();
+	end
+
 	while currentVersion < targetVersion do
 		local migrateFunction = migrateTable[currentVersion];
 		if migrateFunction then

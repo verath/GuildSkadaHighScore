@@ -26,7 +26,9 @@ local UnitIsUnit = UnitIsUnit;
 -- Create ACE3 addon
 local addon = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0", "AceEvent-3.0")
 
+-- Add to addonTable, so our other files can access it (via ... at start of file)
 tinsert(addonTable, addon);
+-- Add to the global env, so other can access our addon as `GuildSkadaHighScore`
 _G[addonName] = addon;
 
 -- Grab the current version string
@@ -52,7 +54,8 @@ addon.dbDefaults = {
 	},
 }
 
--- Constants
+
+-- A flag for if debug information should be printed
 local DEBUG_PRINT = false
 --@debug@
 DEBUG_PRINT = true;
@@ -83,6 +86,20 @@ function addon:Debug(...)
 	end
 end
 
+-- Tests if a player with name playerName is in the same
+-- guild as the player running this addon.
+function addon:IsInMyGuild(playerName)
+	if UnitIsUnit(playerName, "player") then
+		-- We are always in our own guild
+		return true
+	elseif self.guildName then
+		local guildName, _, _ = GetGuildInfo(playerName)
+		return (guildName == self.guildName);
+	else
+		return false
+	end
+end
+
 -- Function that updates the guild name of the player
 -- by quering the GetGuildInfo method for the player.
 function addon:UpdateMyGuildName()
@@ -101,25 +118,11 @@ end
 -- Sets the current zone to the zone the player
 -- is currently in.
 function addon:UpdateCurrentZone()
-	local _, _, _, _, _, _, _, zoneId = GetInstanceInfo();
+	local _, _, _, _, _, _, _, mapId = GetInstanceInfo();
 	local zoneName = GetRealZoneText();
-	self.currentZone = {id = zoneId, name = zoneName};
+	self.currentZone = {id = mapId, name = zoneName};
 
-	self:Debug("UpdateCurrentZone", zoneId, zoneName)
-end
-
--- Tests if a player with name playerName is in the same
--- guild as the player running this addon.
-function addon:IsInMyGuild(playerName)
-	if UnitIsUnit(playerName, "player") then
-		-- We are always in our own guild
-		return true
-	elseif self.guildName then
-		local guildName, _, _ = GetGuildInfo(playerName)
-		return (guildName == self.guildName);
-	else
-		return false
-	end
+	self:Debug("UpdateCurrentZone", mapId, zoneName)
 end
 
 -- Creates the "database" via AceDB

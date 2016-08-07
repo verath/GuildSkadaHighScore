@@ -80,22 +80,6 @@ local RAID_ZONE_IDS = {
 }
 
 
--- Takes a difficulty ID and attempts to return a string
--- representation of that difficulty.
-local function getDifficultyNameById(difficultyId)
-	if difficultyId == 7 or difficultyId == 17 then
-		return "LFR";
-	elseif difficultyId == 1 or difficultyId == 3 or difficultyId == 4 or difficultyId == 14 then
-		return "Normal";
-	elseif difficultyId == 2 or difficultyId == 5 or difficultyId == 6 or difficultyId == 15 then
-		return "Heroic";
-	elseif difficultyId == 16 then
-		return "Mythic";
-	end
-
-	return nil
-end
-
 -- Takes an expansionId and returns the raid zone ids for that
 -- expansion, or an empty table for unknown expansionIds
 local function getRaidZonesByExpansionId(expansionId)
@@ -172,7 +156,7 @@ end
 function addon:OnEncounterEndSuccess(encounterId, encounterName, difficultyId, raidSize)
 	self:Debug("OnEncounterEndSuccess")
 
-	local difficultyName = getDifficultyNameById(difficultyId);
+	local difficultyName = GetDifficultyInfo(difficultyId);
 	if not difficultyName then
 		self:Debug(format("Could not map difficultyId %d to a name", difficultyId));
 		return;

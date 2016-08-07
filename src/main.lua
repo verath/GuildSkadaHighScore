@@ -21,6 +21,11 @@ local GetInstanceInfo = GetInstanceInfo;
 local GetRealZoneText = GetRealZoneText;
 local UnitIsUnit = UnitIsUnit;
 local GetExpansionLevel = GetExpansionLevel;
+local GetDifficultyInfo = GetDifficultyInfo;
+local UnitRealmRelationship = UnitRealmRelationship;
+local FULL_PLAYER_NAME = FULL_PLAYER_NAME;
+local LE_REALM_RELATION_SAME = LE_REALM_RELATION_SAME;
+local LE_REALM_RELATION_VIRTUAL = LE_REALM_RELATION_VIRTUAL;
 
 -- Non-cached globals (for mikk's FindGlobals script)
 -- GLOBALS: LibStub
@@ -95,6 +100,21 @@ function addon:Debug(...)
 	end
 end
 
+
+-- Returns the name of the playerName's guild.
+function addon:GetGuildName(playerName)
+	playerName = playerName or "player";
+
+	-- If the guild is cross-realm, add the realm to the name.
+	-- From Blizzard_GuildUI.lua:21
+	local guildName, _, _, realm = GetGuildInfo(playerName);
+	if realm then
+		return format(FULL_PLAYER_NAME, guildName, realm);
+	else
+		return guildName
+	end
+end
+
 -- Tests if a player with name playerName is in the same
 -- guild as the player running this addon.
 function addon:IsInMyGuild(playerName)
@@ -113,9 +133,7 @@ function addon:IsInMyGuild(playerName)
 		return false;
 	end
 
-	local myGuildName, _, _, myGuildRealm = GetGuildInfo("player");
-	local otherGuildName, _, _, otherGuildRealm = GetGuildInfo(playerName);
-	return (myGuildName == otherGuildName and myGuildRealm == otherGuildRealm);
+	return (self:GetGuildName("player") == self:GetGuildName(playerName));
 end
 
 -- Tests if a zone is in the addon's tracked zones.
@@ -151,7 +169,7 @@ function addon:OnEncounterEndSuccess(encounterId, encounterName, difficultyId, r
 		return;
 	end
 
-	local guildName = GetGuildInfo("player");
+	local guildName = self:GetGuildName("player");
 	if not guildName then
 		self:Debug("Could not get the guild name of the player")
 		return;

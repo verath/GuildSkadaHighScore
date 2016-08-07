@@ -566,9 +566,16 @@ function gui:ShowMainFrame()
 			gui:SetSelectedDifficulty(self.selectedDifficulty, true);
 			gui:SetSelectedEncounter(self.selectedEncounter, true);
 			gui:SetSelectedRole(self.selectedRole, true);
-		elseif addon.guildName then 
-			-- Try pre-selecting own guild if has one.
-			gui:SetSelectedGuild(addon.guildName);
+		else
+			-- Try pre-selecting own guild if we have one and it exists
+			-- in the database.
+			local myGuildName = addon:GetGuildName("player");
+			for guildId in pairs(addon.highscore:GetGuilds()) do
+				if guildId == myGuildName then
+					gui:SetSelectedGuild(addon.guildName);
+					break;
+				end
+			end
 		end
 
 		-- Have to do special for our tab group as it is never disabled

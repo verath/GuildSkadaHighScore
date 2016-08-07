@@ -117,12 +117,12 @@ end
 
 -- Sets the current zone to the zone the player
 -- is currently in.
-function addon:UpdateCurrentZone()
+function addon:UpdateMyCurrentZone()
 	local _, _, _, _, _, _, _, mapId = GetInstanceInfo();
 	local zoneName = GetRealZoneText();
 	self.currentZone = {id = mapId, name = zoneName};
 
-	self:Debug("UpdateCurrentZone", mapId, zoneName)
+	self:Debug("UpdateMyCurrentZone", mapId, zoneName)
 end
 
 -- Creates the "database" via AceDB
@@ -199,7 +199,7 @@ function addon:ENCOUNTER_END(evt, encounterId, encounterName, difficultyId, raid
 end
 
 function addon:ZONE_CHANGED_NEW_AREA(evt)
-	self:UpdateCurrentZone();
+	self:UpdateMyCurrentZone();
 end
 
 function addon:OnInitialize()
@@ -223,7 +223,7 @@ function addon:OnEnable()
 	end)
 
 	self:UpdateMyGuildName();
-	self:UpdateCurrentZone();
+	self:UpdateMyCurrentZone();
 
 	if self.options:GetPurgeEnabled() then
 		local maxDaysAge = self.options:GetPurgeMaxParseAge();

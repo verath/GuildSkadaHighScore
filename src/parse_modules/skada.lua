@@ -92,5 +92,5 @@ end
 function mod:OnDisable()
 	wipe(self.pendingParseRequests);
 
-	self:UnHook(Skada, "EndSegment");
+	self:Unhook(Skada, "EndSegment");
 end

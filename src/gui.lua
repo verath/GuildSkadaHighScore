@@ -621,5 +621,5 @@ function gui:OnDisable()
 	wipe(self.parseFilters);
 
 	self:HideMainFrame();
-	self:UnHook("CloseSpecialWindows");
+	self:Unhook("CloseSpecialWindows");
 end

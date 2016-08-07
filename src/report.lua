@@ -260,5 +260,5 @@ end
 
 function report:OnDisable()
 	self:HideReportFrame();
-	self:UnHook("CloseSpecialWindows");
+	self:Unhook("CloseSpecialWindows");
 end

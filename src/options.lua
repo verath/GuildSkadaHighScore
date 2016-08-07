@@ -9,6 +9,7 @@ local addonName, addonTable = ...
 
 -- Cached globals
 local format = format;
+local wipe = wipe;
 
 -- Non-cached globals (for mikk's FindGlobals script)
 -- GLOBALS: LibStub, InterfaceOptionsFrame_OpenToCategory
@@ -56,8 +57,7 @@ local function createOptionsTable()
 								.. ' This cannot be undone!';
 						end,
 						func = function()
-							local highscoreDb = addon.highscore:GetDB();
-							highscoreDb = nil;
+							wipe(addon.highscore:GetDB());
 							addon:SetupDatabase();
 							addon:Print("All parses have been removed.");
 						end,

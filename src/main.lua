@@ -63,8 +63,10 @@ local DEBUG_PRINT = false
 DEBUG_PRINT = true;
 --@end-debug@
 
--- A list of raid zone ids, grouped by expansion id. This list
--- is used to determine if parses for a zone should be added.
+-- A list of raid instance map ids, grouped by expansion id.
+-- This list is used to determine if parses for a zone should
+-- be added.
+-- See: http://wow.gamepedia.com/InstanceMapID
 local RAID_ZONE_IDS = {
 	[5] = { -- WoD
 		1228, -- Highmaul

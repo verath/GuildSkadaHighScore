@@ -258,7 +258,7 @@ function highscore:AddEncounterParsesForPlayers(encounter, players)
 	-- Theses checks _should_ never fail. Something might fail though,
 	-- so these are here as a final safe-guard against bad data being
 	-- inserted into the db (which could be very hard to fix later on).
-	encounter = assert(encounter and type(encounter) == "table");
+	encounter = assert(encounter);
 	players = assert(players);
 	local guildName = assert(encounter.guildName);
 	local zoneId = assert(encounter.zoneId);

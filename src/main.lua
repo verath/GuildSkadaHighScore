@@ -129,16 +129,6 @@ function addon:UpdateMyGuildName()
 	self:Debug("UpdateMyGuildName", self.guildName)
 end
 
--- Sets the current zone to the zone the player
--- is currently in.
-function addon:UpdateMyCurrentZone()
-	local _, _, _, _, _, _, _, mapId = GetInstanceInfo();
-	local zoneName = GetRealZoneText();
-	self.currentZone = {id = mapId, name = zoneName};
-
-	self:Debug("UpdateMyCurrentZone", mapId, zoneName)
-end
-
 -- Creates the "database" via AceDB
 function addon:SetupDatabase()
 	self.db = LibStub("AceDB-3.0"):New("GuildSkadaHighScoreDB", addon.dbDefaults, true)
@@ -168,8 +158,12 @@ function addon:OnEncounterEndSuccess(encounterId, encounterName, difficultyId, r
 		return;
 	end
 
-	local zoneId = self.currentZone.id;
-	local zoneName = self.currentZone.name;
+	-- Get the current zone and make sure it is a tracked zone
+	local zoneName, _, _, _, _, _, _, zoneId = GetInstanceInfo();
+	if not zoneName then
+		self:Debug("Could not find the name of the current zone");
+		return;
+	end
 	if not self:IsTrackedZone(zoneId) then
 		self:Debug("Not in a tracked zone");
 		return;
@@ -216,22 +210,16 @@ function addon:ENCOUNTER_END(evt, encounterId, encounterName, difficultyId, raid
 	end
 end
 
-function addon:ZONE_CHANGED_NEW_AREA(evt)
-	self:UpdateMyCurrentZone();
-end
-
 function addon:OnInitialize()
 	self:SetupDatabase();
 end
 
 function addon:OnEnable()
 	self.trackedZones = getRaidZonesByExpansionId(GetExpansionLevel())
-	self.currentZone = {};
 	self.guildName = nil;
 
 	self:RegisterEvent("ENCOUNTER_END")	
 	self:RegisterEvent("PLAYER_GUILD_UPDATE")
-	self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 
 	self:RegisterChatCommand("gshs", function(arg)
 		if arg == "config" then
@@ -242,7 +230,6 @@ function addon:OnEnable()
 	end)
 
 	self:UpdateMyGuildName();
-	self:UpdateMyCurrentZone();
 
 	if self.options:GetPurgeEnabled() then
 		local maxDaysAge = self.options:GetPurgeMaxParseAge();
@@ -256,12 +243,10 @@ end
 
 function addon:OnDisable()
 	self.trackedZones = nil;
-	self.currentZone = nil;
 	self.guildName = nil;
 
 	self:UnregisterEvent("ENCOUNTER_END")
 	self:UnregisterEvent("PLAYER_GUILD_UPDATE")
-	self:UnregisterEvent("ZONE_CHANGED_NEW_AREA")
 	
 	self:UnregisterChatCommand("gshs");
 end

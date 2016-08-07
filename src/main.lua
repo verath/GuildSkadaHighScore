@@ -52,7 +52,7 @@ addon.dbDefaults = {
 	realm = {
 		modules = {},
 		options = {},
-		dbVersion = addon.dbVersion
+		dbVersion = 1
 	},
 }
 

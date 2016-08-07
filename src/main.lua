@@ -169,6 +169,7 @@ function addon:OnEncounterEndSuccess(encounterId, encounterName, difficultyId, r
 	end
 
 	local encounter = {
+		guildName = guildName,
 		zoneId = zoneId,
 		zoneName = zoneName,
 		id = encounterId,
@@ -190,7 +191,7 @@ function addon:OnEncounterEndSuccess(encounterId, encounterName, difficultyId, r
 		encounter.duration = duration;
 
 		addon.inspect:GetInspectDataForPlayers(players, function()
-			addon.highscore:AddEncounterParsesForPlayers(guildName, encounter, players);
+			addon.highscore:AddEncounterParsesForPlayers(encounter, players);
 		end);
 	end);
 end

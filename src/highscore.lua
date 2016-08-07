@@ -20,6 +20,7 @@ local format = format;
 local ipairs = ipairs;
 local pairs = pairs;
 local assert = assert;
+local type = type;
 
 
 -- Set up module
@@ -251,15 +252,15 @@ local function addEncounterParseForPlayer(parsesTable, player, groupParseId)
 	tinsert(parsesTable, parse);
 end
 
-function highscore:AddEncounterParsesForPlayers(guildName, encounter, players)
+function highscore:AddEncounterParsesForPlayers(encounter, players)
 	local db = self:GetDB()
 
 	-- Theses checks _should_ never fail. Something might fail though,
 	-- so these are here as a final safe-guard against bad data being
 	-- inserted into the db (which could be very hard to fix later on).
-	guildName = assert(guildName);
 	encounter = assert(encounter and type(encounter) == "table");
 	players = assert(players);
+	local guildName = assert(encounter.guildName);
 	local zoneId = assert(encounter.zoneId);
 	local zoneName = assert(encounter.zoneName);
 	local encounterId = assert(encounter.id);

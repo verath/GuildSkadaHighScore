@@ -1,3 +1,7 @@
+# Version 1.0.5
+
+* Updated LibGroupInSpecT dependency.
+
 # Version 1.0.4
 
 * Added an action to remove ALL stored parses (found the in the settings: Interface->GuildSkadaHighScore).

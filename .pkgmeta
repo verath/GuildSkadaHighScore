@@ -16,7 +16,7 @@ externals:
         tag: Release-70000-24
     vendor/LibGroupInSpecT-1.1:
         url: svn://svn.wowace.com/wow/libgroupinspect/mainline/trunk
-        tag: 1.2.0
+        tag: 1.2.1
 
 tools-used:
     - findglobals

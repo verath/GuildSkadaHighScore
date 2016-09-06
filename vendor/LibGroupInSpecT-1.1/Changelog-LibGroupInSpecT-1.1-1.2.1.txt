@@ -1,0 +1,32 @@
+------------------------------------------------------------------------
+r87 | greltok | 2016-08-24 06:33:24 +0000 (Wed, 24 Aug 2016) | 1 line
+Changed paths:
+   A /tags/1.2.1 (from /trunk:86)
+
+Tagging as 1.2.1
+------------------------------------------------------------------------
+r86 | greltok | 2016-08-24 06:25:22 +0000 (Wed, 24 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/LibGroupInSpecT-1.1.lua
+
+TALENT_ACTIVATION_SPELLS no longer relevant.
+------------------------------------------------------------------------
+r84 | greltok | 2016-07-30 07:04:53 +0000 (Sat, 30 Jul 2016) | 1 line
+Changed paths:
+   M /trunk/LibGroupInSpecT-1.1.lua
+
+Added Demon Hunter.
+------------------------------------------------------------------------
+r83 | greltok | 2016-07-29 07:40:55 +0000 (Fri, 29 Jul 2016) | 1 line
+Changed paths:
+   M /trunk/LibGroupInSpecT-1.1.lua
+   M /trunk/LibGroupInSpecT-1.1.toc
+
+Removed glyphs.
+------------------------------------------------------------------------
+r82 | greltok | 2016-07-22 06:29:55 +0000 (Fri, 22 Jul 2016) | 1 line
+Changed paths:
+   M /trunk/LibGroupInSpecT-1.1.lua
+
+Survival hunters are melee.
+------------------------------------------------------------------------

@@ -62,7 +62,7 @@
 --     Returns an array with the set of unit ids for the current group.
 --]]
 
-local MAJOR, MINOR = "LibGroupInSpecT-1.1", tonumber (("$Revision: 84 $"):match ("(%d+)") or 0)
+local MAJOR, MINOR = "LibGroupInSpecT-1.1", tonumber (("$Revision: 86 $"):match ("(%d+)") or 0)
 
 if not LibStub then error(MAJOR.." requires LibStub") end
 local lib = LibStub:NewLibrary (MAJOR, MINOR)
@@ -804,10 +804,8 @@ function lib:UNIT_AURA (unit)
 end
 
 
-local dual_spec_spells = {}
-for i, spellid in ipairs (TALENT_ACTIVATION_SPELLS) do dual_spec_spells[spellid] = true end
 function lib:UNIT_SPELLCAST_SUCCEEDED (unit, spellname, rank, lineid, spellid)
-  if dual_spec_spells[spellid] then
+  if spellid == 200749 then
     self:Query (unit) -- Definitely changed, so high prio refresh
   end
 end

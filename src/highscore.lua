@@ -64,7 +64,8 @@ addon.dbDefaults.realm.modules["highscore"] = {
 	},
 	["zones"] = {
 		["*"] = { -- zoneId
-			zoneName = nil
+			zoneName = nil,
+			zoneType = nil
 		}
 	},
 	["difficulties"] = {
@@ -205,8 +206,9 @@ local function addGroupParse(db, startTime, duration, guildName, zoneId, difficu
 	return key
 end
 
-local function addZone(db, zoneId, zoneName)
+local function addZone(db, zoneId, zoneName, zoneType)
 	db.zones[zoneId].zoneName = zoneName;
+	db.zones[zoneId].zoneType = zoneType;
 end
 
 local function addDifficulty(db, difficultyId, difficultyName)
@@ -263,6 +265,7 @@ function highscore:AddEncounterParsesForPlayers(encounter, players)
 	local guildName = assert(encounter.guildName);
 	local zoneId = assert(encounter.zoneId);
 	local zoneName = assert(encounter.zoneName);
+	local zoneType = assert(encounter.zoneType);
 	local encounterId = assert(encounter.id);
 	local encounterName = assert(encounter.name);
 	local difficultyId = assert(encounter.difficultyId);
@@ -271,7 +274,7 @@ function highscore:AddEncounterParsesForPlayers(encounter, players)
 	local duration = assert(encounter.duration);
 
 	-- Add zone, difficulty and encounter info
-	addZone(db, zoneId, zoneName);
+	addZone(db, zoneId, zoneName, zoneType);
 	addDifficulty(db, difficultyId, difficultyName);
 	addEncounter(db, encounterId, encounterName);
 
@@ -373,7 +376,12 @@ function highscore:GetZones(guildName)
 	local zones = {};
 	local numZones = 0;
 	for zoneId, _ in pairs(db.guilds[guildName].zones) do
-		local zoneName = db.zones[zoneId].zoneName;
+		local zoneName = db.zones[zoneId].zoneName
+		local zoneType = db.zones[zoneId].zoneType
+		-- Append (dungeon) to zones of party type
+		if zoneType == "party" then
+			zoneName = zoneName .. " (dungeon)"
+		end
 		zones[zoneId] = zoneName;
 		numZones = numZones + 1;
 	end

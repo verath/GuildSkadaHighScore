@@ -12,6 +12,7 @@ local addonName, addonTable = ...
 
 -- Cached globals
 local tinsert = tinsert;
+local wipe = wipe;
 local format = format;
 local time = time;
 local tContains = tContains;
@@ -66,9 +67,10 @@ addon.dbDefaults = {
 local DEBUG_PRINT = false
 --@debug@
 DEBUG_PRINT = true;
+_G["gshs"] = addon;
 --@end-debug@
 
--- A list of raid instance map ids, grouped by expansion id.
+-- List of instance map ids, grouped by expansion id.
 -- This list is used to determine if parses for a zone should
 -- be added.
 -- See: http://wow.gamepedia.com/InstanceMapID
@@ -83,13 +85,19 @@ local RAID_ZONE_IDS = {
 		1094, -- The Emerald Nightmare
 	},
 }
-
-
--- Takes an expansionId and returns the raid zone ids for that
--- expansion, or an empty table for unknown expansionIds
-local function getRaidZonesByExpansionId(expansionId)
-	return RAID_ZONE_IDS[expansionId] or {};
-end
+local DUNGEON_ZONE_IDS = {
+	[6] = { -- Legion
+		--1081, -- Black Rook Hold
+		--1087, -- Court of Stars
+		--1067, -- Darkheart Thicket
+		--1046, -- Eye of Azshara
+		1477, -- Halls of Valor
+		--1042, -- Maw of Souls
+		--1065, -- Neltharion's Lair
+		--1045, -- Vault of the Wardens
+		--1066, -- Violet Hold
+	},
+}
 
 
 -- A wrapper around :Pring that only prints if the
@@ -100,6 +108,20 @@ function addon:Debug(...)
 	end
 end
 
+-- Updates the tracked zones, depending on the player's
+-- expansion level.
+function addon:UpdateTrackedZones()
+	local expansionId = GetExpansionLevel();
+	local raidZones = (RAID_ZONE_IDS[expansionId] or {});
+	local dungeonZones = (DUNGEON_ZONE_IDS[expansionId] or {});
+	self.trackedZones = {};
+	for _, zoneId in ipairs(raidZones) do
+		tinsert(self.trackedZones, zoneId)
+	end
+	for _, zoneId in ipairs(dungeonZones) do
+		tinsert(self.trackedZones, zoneId)
+	end
+end
 
 -- Returns the name of the playerName's guild.
 function addon:GetGuildName(playerName)
@@ -176,13 +198,13 @@ function addon:OnEncounterEndSuccess(encounterId, encounterName, difficultyId, r
 	end
 
 	-- Get the current zone and make sure it is a tracked zone
-	local zoneName, _, _, _, _, _, _, zoneId = GetInstanceInfo();
+	local zoneName, zoneType, _, _, _, _, _, zoneId = GetInstanceInfo();
 	if not zoneName then
 		self:Debug("Could not find the name of the current zone");
 		return;
 	end
 	if not self:IsTrackedZone(zoneId) then
-		self:Debug("Not in a tracked zone");
+		self:Debug("Not in a tracked zone", zoneId);
 		return;
 	end
 
@@ -190,6 +212,7 @@ function addon:OnEncounterEndSuccess(encounterId, encounterName, difficultyId, r
 		guildName = guildName,
 		zoneId = zoneId,
 		zoneName = zoneName,
+		zoneType = zoneType,
 		id = encounterId,
 		name = encounterName,
 		difficultyId = difficultyId,
@@ -227,7 +250,7 @@ function addon:OnInitialize()
 end
 
 function addon:OnEnable()
-	self.trackedZones = getRaidZonesByExpansionId(GetExpansionLevel())
+	self:UpdateTrackedZones();
 
 	self:RegisterEvent("ENCOUNTER_END")	
 	self:RegisterChatCommand("gshs", function(arg)

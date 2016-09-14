@@ -378,9 +378,8 @@ function highscore:GetZones(guildName)
 	for zoneId, _ in pairs(db.guilds[guildName].zones) do
 		local zoneName = db.zones[zoneId].zoneName
 		local zoneType = db.zones[zoneId].zoneType
-		-- Append (dungeon) to zones of party type
 		if zoneType == "party" then
-			zoneName = zoneName .. " (dungeon)"
+			zoneName = zoneName .. " (5-man)"
 		end
 		zones[zoneId] = zoneName;
 		numZones = numZones + 1;

@@ -87,15 +87,16 @@ local RAID_ZONE_IDS = {
 }
 local DUNGEON_ZONE_IDS = {
 	[6] = { -- Legion
-		--1081, -- Black Rook Hold
-		--1087, -- Court of Stars
-		--1067, -- Darkheart Thicket
-		--1046, -- Eye of Azshara
+		1501, -- Black Rook Hold
+		1571, -- Court of Stars
+		1466, -- Darkheart Thicket
+		1456, -- Eye of Azshara
 		1477, -- Halls of Valor
-		--1042, -- Maw of Souls
-		--1065, -- Neltharion's Lair
-		--1045, -- Vault of the Wardens
-		--1066, -- Violet Hold
+		1492, -- Maw of Souls
+		1458, -- Neltharion's Lair
+		1516, -- The Arcway
+		1493, -- Vault of the Wardens
+		1544, -- Violet Hold
 	},
 }
 

@@ -93,6 +93,19 @@ function inspect:GetItemLevel(unitName)
 	end
 end
 
+-- Updates the playerInfo for the local player. This does not require
+-- an inspect.
+function inspect:UpdateLocalPlayerItemLevel()
+	local guid = UnitGUID("player");
+	if not guid then return	end
+
+	self.playerInfo[guid] = self.playerInfo[guid] or {};
+	local playerInfo = self.playerInfo[guid];
+
+	local itemLevel = self:GetItemLevel("player");
+	playerInfo["itemLevel"] = itemLevel or playerInfo["itemLevel"];
+end
+
 -- Helper method for getting inspect data for a single player,
 -- modifying the player object in place.
 function inspect:GetInspectDataForPlayer(player)
@@ -186,13 +199,7 @@ end
 -- to update the player's stored item level directly, instead of
 -- waiting for LGIST to "re-inspect" the player
 function inspect:PLAYER_EQUIPMENT_CHANGED(slot, hasItem)
-	local guid = UnitGUID("player");
-
-	self.playerInfo[guid] = self.playerInfo[guid] or {};
-	local playerInfo = self.playerInfo[guid];
-
-	local itemLevel = self:GetItemLevel("player");
-	playerInfo["itemLevel"] = itemLevel or playerInfo["itemLevel"];
+	self:UpdateLocalPlayerItemLevel();
 end
 
 function inspect:OnEnable()
@@ -202,6 +209,8 @@ function inspect:OnEnable()
 	LGIST.RegisterCallback(self, "GroupInSpecT_Remove");
 	LGIST.RegisterCallback(self, "GroupInSpecT_InspectReady");
 	self:RegisterEvent("PLAYER_EQUIPMENT_CHANGED");
+
+	self:UpdateLocalPlayerItemLevel();
 end
 
 function inspect:OnDisable()

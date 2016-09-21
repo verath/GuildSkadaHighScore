@@ -79,8 +79,8 @@ local RAID_ZONE_IDS = {
 		1448, -- Hellfire Citadel
 	},
 	[6] = { -- Legion
-		1088, -- The Nighthold
-		1094, -- The Emerald Nightmare
+		--, -- The Nighthold
+		1520, -- The Emerald Nightmare
 	},
 }
 

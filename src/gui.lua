@@ -34,6 +34,24 @@ local AceGUI = LibStub("AceGUI-3.0");
 local RAID_TIME_FORMAT = "%m/%d/%y %H:%M";
 
 
+-- Takes an ace3 dropdown table (table of key=>value pairs)
+-- and returns an ordering table that sorts the dropdown
+-- in lexographical order
+local function createDropdownOrderTable(dropdownTable)
+	local data = {}
+	for key, value in pairs(dropdownTable) do
+		tinsert(data, {value=value, key=key})
+	end
+	sort(data, function(a, b)
+		return a.value < b.value;
+	end)
+	local order = {}
+	for i, v in ipairs(data) do
+		tinsert(order, v.key);
+	end
+	return order;
+end
+
 -- Creats a row of labels taking up 1/numLabels relative
 -- width per label and adds each label to the container.
 -- The labels data should be a list of objects:
@@ -70,7 +88,8 @@ function gui:CreateGuildDropdown()
 
 	local guilds, numGuilds = addon.highscore:GetGuilds();
 	if numGuilds > 0 then
-		dropdown:SetList(guilds);
+		local order = createDropdownOrderTable(guilds)
+		dropdown:SetList(guilds, order);
 	else
 		dropdown:SetDisabled(true);
 		dropdown:SetText("No Guilds.");
@@ -490,8 +509,9 @@ function gui:SetSelectedDifficulty(difficultyId, noPropagation)
 	-- Update encounter dropdown with new guild, zone, difficulty
 	local encounters, numEncounters = addon.highscore:GetEncounters(self.selectedGuild, self.selectedZone, self.selectedDifficulty);
 	if numEncounters > 0 then
+		local order = createDropdownOrderTable(encounters)
 		self.encounterDropdown:SetDisabled(false);
-		self.encounterDropdown:SetList(encounters);
+		self.encounterDropdown:SetList(encounters, order);
 	else
 		self.encounterDropdown:SetDisabled(true);
 		self.encounterDropdown:SetList(nil);
@@ -516,8 +536,9 @@ function gui:SetSelectedZone(zoneId, noPropagation)
 	-- Update difficulty dropdown with new guild, zone
 	local difficulties, numDifficulties = addon.highscore:GetDifficulties(self.selectedGuild, self.selectedZone);
 	if numDifficulties > 0 then
+		local order = createDropdownOrderTable(difficulties)
 		self.difficultyDropdown:SetDisabled(false);
-		self.difficultyDropdown:SetList(difficulties);
+		self.difficultyDropdown:SetList(difficulties, order);
 	else
 		self.difficultyDropdown:SetDisabled(true);
 		self.difficultyDropdown:SetList(nil);
@@ -542,8 +563,9 @@ function gui:SetSelectedGuild(guildId, noPropagation)
 	-- Update zone dropdown for the new guild
 	local zones, numZones = addon.highscore:GetZones(guildId);
 	if numZones > 0 then
+		local order = createDropdownOrderTable(zones)
 		self.zoneDropdown:SetDisabled(false);
-		self.zoneDropdown:SetList(zones);
+		self.zoneDropdown:SetList(zones, order);
 	else
 		self.zoneDropdown:SetDisabled(true);
 		self.zoneDropdown:SetList(nil);

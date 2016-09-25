@@ -97,6 +97,8 @@ local function createFilterString(filters)
 			filterString = filterString .. format("Name: %s", filterValue);
 		elseif filterKey == "startTime" then
 			filterString = filterString .. format("Time: %s", date(FILTER_START_TIME_FORMAT, filterValue));
+		elseif filterKey == "specName" then
+			filterString = filterString .. format("Spec: %s", filterValue)
 		else
 			filterString = filterString .. format("%s: %s", filterKey, filterValue);
 		end

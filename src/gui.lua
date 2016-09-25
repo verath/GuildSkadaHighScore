@@ -138,13 +138,15 @@ function gui:CreateFilterEntry(filterId, filterValue)
 		filterText = "Time: " .. date(RAID_TIME_FORMAT, filterValue);
 	elseif filterId == "name" then
 		filterText = "Name: " .. filterValue;
-	else 
+	elseif filterId == "specName" then
+		filterText = "Spec: " .. filterValue
+	else
 		return nil;
 	end
 
 	local entryBtn = AceGUI:Create("Button")
 	entryBtn:SetText(filterText);
-	entryBtn:SetRelativeWidth(0.5);
+	entryBtn:SetRelativeWidth(0.3);
 	entryBtn:SetCallback("OnClick", function()
 		self:UnsetParseFilter(filterId);
 	end);
@@ -240,7 +242,13 @@ function gui:CreateHighScoreParseEntry(parse, role, rank)
 				self:ToggleParseFilter("name", parse.name);
 			end
 		},
-		{"spec", parse.specName},
+		{"spec",
+			parse.specName,
+			nil,
+			function()
+				self:ToggleParseFilter("specName", parse.specName)
+			end
+		},
 		{"ilvl", parse.itemLevel},
 		{"time", 
 			date(RAID_TIME_FORMAT, parse.startTime),

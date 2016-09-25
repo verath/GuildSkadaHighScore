@@ -201,14 +201,11 @@ end
 
 -- Creates the headers for the parses:
 -- Rank | DPS/HPS | Name | Spec | Item Level | Time
-function gui:CreateHighScoreParseHeader()
-	local headerContainer = AceGUI:Create("SimpleGroup");
-	headerContainer:SetFullWidth(true);
-	headerContainer:SetLayout("Flow");
-
+function gui:CreateHeaderRow(headerContainer, role)
+	local dpsHpsText = (role == "HEALER") and "HPS" or "DPS";
 	local labelDatas = {
 		{"rank", "Rank"},
-		{"dpsHps", "DPS/HPS"},
+		{"dpsHps", dpsHpsText},
 		{"name", "Name"},
 		{"spec", "Spec"},
 		{"ilvl", "Item Level"},
@@ -263,15 +260,20 @@ function gui:CreateHighScoreScrollFrame()
 	scrollFrame:SetLayout("Flow");
 	scrollFrame:SetFullWidth(true);
 	scrollFrame:SetFullHeight(true);
-
 	self.highScoreParsesScrollFrame = scrollFrame;
 
+	local headerContainer = AceGUI:Create("SimpleGroup");
+	headerContainer:SetFullWidth(true);
+	headerContainer:SetLayout("Flow");
+	self:CreateHeaderRow(headerContainer, "DAMAGER");
+	self.highScoreHeaderContainer = headerContainer;
+
 	local parsesContainer = AceGUI:Create("SimpleGroup");
-	self.highScoreParsesContainer = parsesContainer;
 	parsesContainer:SetFullWidth(true);
 	parsesContainer:SetLayout("Flow");
+	self.highScoreParsesContainer = parsesContainer;
 
-	scrollFrame:AddChild(self:CreateHighScoreParseHeader());
+	scrollFrame:AddChild(headerContainer);
 	scrollFrame:AddChild(parsesContainer);
 
 	return scrollFrame;
@@ -423,9 +425,13 @@ function gui:DisplayParses()
 	
 	self.reportButton:SetDisabled(true);
 
+	local headerContainer = self.highScoreHeaderContainer;
 	local parsesContainer = self.highScoreParsesContainer;
 	local scrollFrame = self.highScoreParsesScrollFrame;
+	headerContainer:ReleaseChildren();
 	parsesContainer:ReleaseChildren();
+
+	self:CreateHeaderRow(headerContainer, roleId);
 
 	if guildName and zoneId and difficultyId and encounter and roleId then
 		local parses, _ = addon.highscore:GetParses(guildName, zoneId, difficultyId, encounter, roleId);
@@ -595,6 +601,7 @@ function gui:HideMainFrame()
 		self.encounterDropdown = nil;
 		self.filterContainer = nil;
 		self.highScoreTabGroup = nil;
+		self.highScoreHeaderContainer = nil;
 		self.highScoreParsesContainer = nil;
 		self.highScoreParsesScrollFrame = nil;
 		self.reportButton = nil;

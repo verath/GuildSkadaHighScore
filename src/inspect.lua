@@ -103,7 +103,7 @@ function inspect:UpdateLocalPlayerItemLevel()
 	local playerInfo = self.playerInfo[guid];
 
 	local itemLevel = self:GetItemLevel("player");
-	playerInfo["itemLevel"] = itemLevel or playerInfo["itemLevel"];
+	playerInfo["itemLevel"] = itemLevel;
 end
 
 -- Helper method for getting inspect data for a single player,

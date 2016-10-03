@@ -35,8 +35,13 @@ local addon = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0", "Ace
 
 -- Add to addonTable, so our other files can access it (via ... at start of file)
 tinsert(addonTable, addon);
+
 -- Add to the global env, so other can access our addon as `GuildSkadaHighScore`
+-- and also as "gshs" in debug mode
 _G[addonName] = addon;
+--@debug@
+_G["gshs"] = addon;
+--@end-debug@
 
 -- Grab the current version string
 addon.versionName = GetAddOnMetadata(addonName, "Version");

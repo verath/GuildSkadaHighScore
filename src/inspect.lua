@@ -22,9 +22,8 @@ local addonName, addonTable = ...
 
 -- Cached globals
 local floor = floor;
-local max = max;
 local ipairs = ipairs;
-local tContains = tContains;
+local pairs = pairs;
 local UnitIsUnit = UnitIsUnit;
 local UnitGUID = UnitGUID;
 local GetAverageItemLevel = GetAverageItemLevel;
@@ -69,39 +68,6 @@ local INVENTORY_SLOT_IDS = {
 -- The number of slots used for item level
 local NUM_INVENTORY_SLOT_IDS = #INVENTORY_SLOT_IDS;
 
--- List of ids for the main hand artifact weapons that 
--- also uses an off-hand. Used for item level calculations, 
--- as one item in the pair is ilvl 750.
-local MAINHAND_OFFHAND_ARTIFACT_IDS = {
-	128292, -- Death Knight, Frost (Frostreaper)
-	127829, -- Demon Hunter, Havoc (Verus)
-	128832, -- Demon Hunter, Vengeance (Aldrachi Warblades)
-	128860, -- Druid, Feral (Fangs of Ashamane)
-	128821, -- Druid, Guardian (Claws of Ursoc)
-	128820, -- Mage, Fire (Felo'melorn)
-	128940, -- Monk, Windwalker (Al'burq)
-	128867, -- Paladin, Protection (Oathseeker)
-	128827, -- Priest, Shadow (Xal'atath, Blade of the Black Empire)
-	128870, -- Rogue, Assassination (Anguish)
-	128872, -- Rogue, Outlaw (Fate)
-	128476, -- Rogue, Subtlety (Gorefang)
-	128935, -- Shaman, Elemental (The Fist of Ra-den)
-	128819, -- Shaman, Enhancement (Doomhammer)
-	128911, -- Shaman, Restoration (Sharas'dal, Scepter of Tides)
-	137246, -- Warlock, Demonology (Spine of Thal'kiel)
-	128908, -- Warrior, Fury (Odyn's Fury)
-	128288, -- Warrior, Protection (Scaleshard)
-};
-
-
--- Checks if the unitName uses a mh+oh artifact weapon by comparing
--- the itemId of the mainhand to MAINHAND_OFFHAND_ARTIFACT_IDS.
-local function hasMainHandOffHandArtifact(unitName)
-	local mhItemId = GetInventoryItemID(unitName, INVSLOT_MAINHAND);
-	return tContains(MAINHAND_OFFHAND_ARTIFACT_IDS, mhItemId)
-end
-
-
 -- Attempts to get the item level of the provided unitName.
 -- The unitName must either be "player" or a unit currently being
 -- inspected.
@@ -119,12 +85,11 @@ function inspect:GetItemLevel(unitName)
 			end
 			-- If we cannot get the item level for a slot we consider this
 			-- failed, likely due to item information not being available 
-			-- yet. An exception is the off-hand slot, which can be empty 
-			-- for 2h weps. This is checked later.
+			-- yet. An exception is the off-hand slot, which is empty for 
+			-- 2h weps.
 			if not itemLevel and slotId ~= INVSLOT_OFFHAND then
 				return nil;
 			end
-			self:Debug(slotId, itemLink, itemLevel)
 			slotItemLevel[slotId] = itemLevel;
 		end
 
@@ -135,26 +100,12 @@ function inspect:GetItemLevel(unitName)
 			slotItemLevel[INVSLOT_OFFHAND] = slotItemLevel[INVSLOT_MAINHAND];
 		end
 
-		-- HACK(2016-10-03, 7.0.3): Check for MH+OH artifacts, and set 
-		-- mh = oh = max(mh, oh) if that is the case.
-		-- https://www.wowace.com/addons/libitemupgradeinfo-1-0/tickets/14-artifact-offhand-always-750/
-		if hasMainHandOffHandArtifact(unitName) then
-			local artifactItemLevel = max(slotItemLevel[INVSLOT_MAINHAND], slotItemLevel[INVSLOT_OFFHAND]);
-			self:Debug(unitName, "has mh+oh artifact");
-			self:Debug("MH: ", slotItemLevel[INVSLOT_MAINHAND])
-			self:Debug("OH: ", slotItemLevel[INVSLOT_OFFHAND])
-			self:Debug("Using: ", artifactItemLevel)
-			slotItemLevel[INVSLOT_MAINHAND] = artifactItemLevel;
-			slotItemLevel[INVSLOT_OFFHAND] = artifactItemLevel;
-		end
-
 		local total = 0;
 		for _, itemLevel in pairs(slotItemLevel) do
 			total = total + itemLevel;
 		end
-		self:Debug("ItemLevel: ", floor(total / NUM_INVENTORY_SLOT_IDS));
 		return floor(total / NUM_INVENTORY_SLOT_IDS);
-	--end
+	end
 end
 
 -- Updates the playerInfo for the local player. This does not require

@@ -193,8 +193,7 @@ function inspect:GetInspectDataForPlayer(player)
 			player["role"] = playerInfo["specRole"];
 		end
 
-		self:Debug("inspect:GetInspectDataForPlayer", "success", 
-			player["specName"], player["itemLevel"], player["role"]);
+		--self:Debug("inspect:GetInspectDataForPlayer", "success", player["specName"], player["itemLevel"], player["role"]);
 	else
 		self:Debug("inspect:GetInspectDataForPlayer", "fail");
 	end
@@ -218,7 +217,7 @@ function inspect:GroupInSpecT_InspectReady(evt, guid, unit)
 	-- As getting the itemLevel can be slow, we don't perform this
 	-- action for players that are not currently part of our guild.
 	if not addon:IsInMyGuild(unit) then
-		self:Debug("inspect:GroupInSpecT_InspectReady", unit, "is not in our guild");
+		--self:Debug("inspect:GroupInSpecT_InspectReady", unit, "is not in our guild");
 		return;
 	end
 
@@ -237,7 +236,7 @@ function inspect:GroupInSpecT_InspectReady(evt, guid, unit)
 		playerInfo["itemLevel"] = itemLevel;
 	end
 
-	self:Debug("inspect:GroupInSpecT_InspectReady", unit, itemLevel, playerInfo["itemLevel"])
+	--self:Debug("inspect:GroupInSpecT_InspectReady", unit, itemLevel, playerInfo["itemLevel"])
 end
 
 -- LGIST event for when info for a player is ready or has been modified.

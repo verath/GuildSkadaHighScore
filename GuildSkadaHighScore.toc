@@ -7,6 +7,9 @@
 ## Dependencies:
 ## OptionalDeps: Ace3, LibItemUpgradeInfo-1.0, LibGroupInSpecT-1.1
 
+
+vendor\LibDataBroker-1.1\LibDataBroker-1.1.lua
+
 #@no-lib-strip@
 vendor\Ace3\LibStub\LibStub.lua
 vendor\Ace3\CallbackHandler-1.0\CallbackHandler-1.0.xml
@@ -21,6 +24,7 @@ vendor\Ace3\AceConfig-3.0\AceConfig-3.0.xml
 
 vendor\LibItemUpgradeInfo-1.0\LibItemUpgradeInfo-1.0.xml
 vendor\LibGroupInSpecT-1.1\lib.xml
+vendor\LibDBIcon-1.0\LibDBIcon-1.0\lib.xml
 #@end-no-lib-strip@
 
 src\src_include.xml

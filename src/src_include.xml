@@ -6,5 +6,6 @@
 	<Script file="report.lua"/>
 	<Script file="options.lua"/>
 	<Script file="migrate.lua"/>
+	<Script file="ldb.lua"/>
 	<Include file="parse_modules\parse_modules_include.xml"/>
 </Ui>

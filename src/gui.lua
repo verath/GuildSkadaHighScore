@@ -638,6 +638,10 @@ function gui:HideMainFrame()
 	end
 end
 
+function gui:ToggleMainFrame()
+	if self.mainFrame then self:HideMainFrame() else self:ShowMainFrame() end
+end
+
 function gui:OnCloseSpecialWindows()
 	local found;
 	if self.mainFrame then

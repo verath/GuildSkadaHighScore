@@ -41,6 +41,27 @@ local function createOptionsTable()
 				name = format("Version: %s", addon.versionName),
 				width = "Full",
 			},
+			generalSettings = {
+				name = "General",
+				type = "group",
+				inline = true,
+				order = 5,
+				args = {
+					ShowMinimapIcon = {
+						name = "Minimap Icon",
+						desc = "Toggles the icon on the minimap.",
+						type = "toggle",
+						width = "full",
+						order = 10,
+						get = function()
+							return addon.ldb:IsMinimapIconShown();
+						end,
+						set = function(info, v)
+							addon.ldb:SetMinimapIconShown(v);
+						end,
+					},
+				},
+			},
 			actions = {
 				name = "Actions",
 				type = "group",

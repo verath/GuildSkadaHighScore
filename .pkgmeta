@@ -5,7 +5,10 @@ manual-changelog:
     markup-type: markdown
 
 ignore:
-  - vendor
+  - vendor/Ace3
+  - vendor/LibDBIcon-1.0
+  - vendor/LibGroupInSpecT-1.1
+  - vendor/LibItemUpgradeInfo-1.0
 
 externals:
     vendor/Ace3:

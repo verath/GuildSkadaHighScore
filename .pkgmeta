@@ -8,15 +8,11 @@ ignore:
   - vendor/Ace3
   - vendor/LibDBIcon-1.0
   - vendor/LibGroupInSpecT-1.1
-  - vendor/LibItemUpgradeInfo-1.0
 
 externals:
     vendor/Ace3:
         url: svn://svn.wowace.com/wow/ace3/mainline/trunk
         tag: Release-r1151
-    vendor/LibItemUpgradeInfo-1.0:
-        url: git://git.wowace.com/wow/libitemupgradeinfo-1-0/mainline.git
-        tag: Release-70000-24
     vendor/LibGroupInSpecT-1.1:
         url: svn://svn.wowace.com/wow/libgroupinspect/mainline/trunk
         tag: 1.2.1

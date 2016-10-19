@@ -5,7 +5,7 @@
 ## Notes: Tracking and ranking of dps/hps in a guild.
 ## SavedVariables: GuildSkadaHighScoreDB
 ## Dependencies:
-## OptionalDeps: Ace3, LibItemUpgradeInfo-1.0, LibGroupInSpecT-1.1
+## OptionalDeps: Ace3, LibGroupInSpecT-1.1
 
 
 vendor\LibDataBroker-1.1\LibDataBroker-1.1.lua
@@ -22,7 +22,6 @@ vendor\Ace3\AceHook-3.0\AceHook-3.0.xml
 vendor\Ace3\AceTimer-3.0\AceTimer-3.0.xml
 vendor\Ace3\AceConfig-3.0\AceConfig-3.0.xml
 
-vendor\LibItemUpgradeInfo-1.0\LibItemUpgradeInfo-1.0.xml
 vendor\LibGroupInSpecT-1.1\lib.xml
 vendor\LibDBIcon-1.0\LibDBIcon-1.0\lib.xml
 #@end-no-lib-strip@

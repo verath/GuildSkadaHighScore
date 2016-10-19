@@ -33,9 +33,6 @@ local GetInventoryItemLink = GetInventoryItemLink;
 -- LibGroupInSpecT, lib handling inspection of group members
 local LGIST = LibStub("LibGroupInSpecT-1.1")
 
--- ItemUpgradeInfo, lib for information about item upgrades applied to items.
-local ItemUpgradeInfo = LibStub("LibItemUpgradeInfo-1.0")
-
 -- Set up module
 local addon = addonTable[1];
 local inspect = addon:NewModule("inspect", "AceEvent-3.0", "AceTimer-3.0")
@@ -81,7 +78,7 @@ function inspect:GetItemLevel(unitName)
 			local itemLevel;
 			local itemLink = GetInventoryItemLink(unitName, slotId);
 			if itemLink then
-				itemLevel = ItemUpgradeInfo:GetUpgradedItemLevel(itemLink);
+				itemLevel = GetDetailedItemLevelInfo(itemLink);
 			end
 			-- If we cannot get the item level for a slot we consider this
 			-- failed, likely due to item information not being available 

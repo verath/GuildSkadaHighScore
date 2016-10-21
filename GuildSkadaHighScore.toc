@@ -5,7 +5,7 @@
 ## Notes: Tracking and ranking of dps/hps in a guild.
 ## SavedVariables: GuildSkadaHighScoreDB
 ## Dependencies:
-## OptionalDeps: Ace3, LibItemUpgradeInfo-1.0, LibGroupInSpecT-1.1
+## OptionalDeps: Ace3, LibItemUpgradeInfo-1.0, LibGroupInSpecT-1.1, LibDBIcon-1.0
 
 #@no-lib-strip@
 vendor\Ace3\LibStub\LibStub.lua

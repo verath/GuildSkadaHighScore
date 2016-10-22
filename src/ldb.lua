@@ -11,7 +11,7 @@ local LibDBIcon = LibStub("LibDBIcon-1.0");
 
 -- Set up module
 local addon = addonTable[1];
-local ldb = addon:NewModule("ldb", "AceHook-3.0")
+local ldb = addon:NewModule("ldb")
 addon.ldb = ldb;
 
 -- DB defaults

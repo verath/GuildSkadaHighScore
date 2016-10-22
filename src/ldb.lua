@@ -66,4 +66,14 @@ function ldb:OnEnable()
 	end
 
 	LibDBIcon:Register(LDB_ICON_NAME, dataObject, addon.db.profile.ldbIcon);
+
+	-- HACK: Possible workaround for ticket 5, copied from Skada.
+	-- The above Register call should already handle this, but
+	-- for some reason does not always do so.
+	LibDBIcon:Refresh(LDB_ICON_NAME, addon.db.profile.ldbIcon)
+	if addon.db.profile.ldbIcon.hide then
+		LibDBIcon:Hide(LDB_ICON_NAME)
+	else
+		LibDBIcon:Show(LDB_ICON_NAME)
+	end
 end

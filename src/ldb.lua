@@ -11,7 +11,7 @@ local LibDBIcon = LibStub("LibDBIcon-1.0");
 
 -- Set up module
 local addon = addonTable[1];
-local ldb = addon:NewModule("ldb", "AceHook-3.0")
+local ldb = addon:NewModule("ldb")
 addon.ldb = ldb;
 
 -- DB defaults
@@ -66,4 +66,14 @@ function ldb:OnEnable()
 	end
 
 	LibDBIcon:Register(LDB_ICON_NAME, dataObject, addon.db.profile.ldbIcon);
+
+	-- HACK: Possible workaround for ticket 5, copied from Skada.
+	-- The above Register call should already handle this, but
+	-- for some reason does not always do so.
+	LibDBIcon:Refresh(LDB_ICON_NAME, addon.db.profile.ldbIcon)
+	if addon.db.profile.ldbIcon.hide then
+		LibDBIcon:Hide(LDB_ICON_NAME)
+	else
+		LibDBIcon:Show(LDB_ICON_NAME)
+	end
 end

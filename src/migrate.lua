@@ -160,6 +160,15 @@ function migrate:DoMigration()
 	self:Debug(format("Attempting to migrate from dbVersion: %d to %d.", 
 		currentVersion, targetVersion));
 
+	-- If we can't find a version, we assume the db is newly created.
+	-- This should mean that the db is in a good state, and all we need
+	-- to do is to update the dbVersion.
+	if currentVersion == 1 then
+		self:Debug("No version of current db found, assuming new db.")
+		db.realm.dbVersion = targetVersion;
+		return;
+	end
+
 	if currentVersion > targetVersion then
 		self:Debug(format("Could not migrate from dbVersion: %d!", currentVersion));
 		resetDb();

@@ -22,8 +22,9 @@ local addonName, addonTable = ...
 
 -- Cached globals
 local floor = floor;
+local max = max;
 local ipairs = ipairs;
-local pairs = pairs;
+local tContains = tContains;
 local UnitIsUnit = UnitIsUnit;
 local UnitGUID = UnitGUID;
 local GetAverageItemLevel = GetAverageItemLevel;
@@ -65,6 +66,38 @@ local INVENTORY_SLOT_IDS = {
 -- The number of slots used for item level
 local NUM_INVENTORY_SLOT_IDS = #INVENTORY_SLOT_IDS;
 
+-- List of ids for the main hand artifact weapons that
+-- also uses an off-hand. Used for item level calculations,
+-- as one item in the pair seems to be ilvl 750.
+local MAINHAND_OFFHAND_ARTIFACT_IDS = {
+	128292, -- Death Knight, Frost (Frostreaper)
+	127829, -- Demon Hunter, Havoc (Verus)
+	128832, -- Demon Hunter, Vengeance (Aldrachi Warblades)
+	128860, -- Druid, Feral (Fangs of Ashamane)
+	128821, -- Druid, Guardian (Claws of Ursoc)
+	128820, -- Mage, Fire (Felo'melorn)
+	128940, -- Monk, Windwalker (Al'burq)
+	128867, -- Paladin, Protection (Oathseeker)
+	128827, -- Priest, Shadow (Xal'atath, Blade of the Black Empire)
+	128870, -- Rogue, Assassination (Anguish)
+	128872, -- Rogue, Outlaw (Fate)
+	128476, -- Rogue, Subtlety (Gorefang)
+	128935, -- Shaman, Elemental (The Fist of Ra-den)
+	128819, -- Shaman, Enhancement (Doomhammer)
+	128911, -- Shaman, Restoration (Sharas'dal, Scepter of Tides)
+	137246, -- Warlock, Demonology (Spine of Thal'kiel)
+	128908, -- Warrior, Fury (Odyn's Fury)
+	128288, -- Warrior, Protection (Scaleshard)
+};
+
+
+-- Checks if the unitName uses a mh+oh artifact weapon by comparing
+-- the itemId of the mainhand to MAINHAND_OFFHAND_ARTIFACT_IDS.
+local function hasMainHandOffHandArtifact(unitName)
+	local mhItemId = GetInventoryItemID(unitName, INVSLOT_MAINHAND);
+	return tContains(MAINHAND_OFFHAND_ARTIFACT_IDS, mhItemId)
+end
+
 -- Attempts to get the item level of the provided unitName.
 -- The unitName must either be "player" or a unit currently being
 -- inspected.
@@ -95,6 +128,14 @@ function inspect:GetItemLevel(unitName)
 		-- 2h weapon seems to match the in-game avg item level.
 		if not slotItemLevel[INVSLOT_OFFHAND] then
 			slotItemLevel[INVSLOT_OFFHAND] = slotItemLevel[INVSLOT_MAINHAND];
+		end
+
+		-- HACK(2016-10-26, 7.1.0): Check for MH+OH artifacts, and set
+		-- item level for both to the highest of the two.
+		if hasMainHandOffHandArtifact(unitName) then
+			local artifactItemLevel = max(slotItemLevel[INVSLOT_MAINHAND], slotItemLevel[INVSLOT_OFFHAND]);
+			slotItemLevel[INVSLOT_MAINHAND] = artifactItemLevel;
+			slotItemLevel[INVSLOT_OFFHAND] = artifactItemLevel;
 		end
 
 		local total = 0;

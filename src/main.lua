@@ -123,13 +123,14 @@ end
 -- Tests if a player with name playerName is in the same
 -- guild as the player running this addon.
 function addon:IsInMyGuild(playerName)
-	if not IsInGuild() then
-		return false;
+	if UnitIsUnit(playerName, "player") then
+		-- We are always in our own guild, even when
+		-- we are not in a guild.
+		return true;
 	end
 
-	if UnitIsUnit(playerName, "player") then
-		-- We are always in our own guild
-		return true;
+	if not IsInGuild() then
+		return false;
 	end
 
 	local relation = UnitRealmRelationship(playerName)
@@ -169,15 +170,18 @@ function addon:OnEncounterEndSuccess(encounterId, encounterName, difficultyId, r
 		return;
 	end
 
-	if not IsInGuild() then
-		self:Debug("Not in a guild");
-		return;
-	end
-
-	local guildName = self:GetGuildName("player");
-	if not guildName then
-		self:Debug("Could not get the guild name of the player")
-		return;
+	local guildName;
+	if IsInGuild() then
+		guildName = self:GetGuildName("player");
+		if not guildName then
+			self:Debug("Could not get the guild name of the player")
+			return;
+		end
+	else
+		-- A dummy name for a guild used to group entries for when
+		-- not part of a guild.
+		guildName = "<No Guild>";
+		self:Debug("Not part of guild, adding entry to <No Guild>");
 	end
 
 	-- Get the current zone and make sure it is a tracked zone

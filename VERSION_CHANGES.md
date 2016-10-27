@@ -1,5 +1,4 @@
-Version 1.0.9 (2016-10-26)
+Version 1.0.10 (2016--)
 
-* Fix for db resetting when logging in on a new realm.
-* Item levels should now be much more accurate.
-* TOC update for wow 7.1
+* Now also tracks kills when not in a guild. These entries are grouped under a guild called "<No Guild>".
+

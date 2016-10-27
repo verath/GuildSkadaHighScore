@@ -92,7 +92,8 @@ function gui:CreateGuildDropdown()
 		dropdown:SetList(guilds, order);
 	else
 		dropdown:SetDisabled(true);
-		dropdown:SetText("No Guilds.");
+		dropdown:SetList(nil);
+		dropdown:SetText(nil);
 	end
 
 	return dropdown;

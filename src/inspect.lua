@@ -24,6 +24,7 @@ local addonName, addonTable = ...
 local floor = floor;
 local max = max;
 local ipairs = ipairs;
+local pairs = pairs;
 local tContains = tContains;
 local UnitIsUnit = UnitIsUnit;
 local UnitGUID = UnitGUID;
@@ -206,7 +207,6 @@ function inspect:GroupInSpecT_InspectReady(evt, guid, unit)
 	-- As getting the itemLevel can be slow, we don't perform this
 	-- action for players that are not currently part of our guild.
 	if not addon:IsInMyGuild(unit) then
-		--self:Debug("inspect:GroupInSpecT_InspectReady", unit, "is not in our guild");
 		return;
 	end
 
@@ -224,8 +224,6 @@ function inspect:GroupInSpecT_InspectReady(evt, guid, unit)
 	if itemLevel then
 		playerInfo["itemLevel"] = itemLevel;
 	end
-
-	--self:Debug("inspect:GroupInSpecT_InspectReady", unit, itemLevel, playerInfo["itemLevel"])
 end
 
 -- LGIST event for when info for a player is ready or has been modified.

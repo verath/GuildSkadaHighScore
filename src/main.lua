@@ -86,6 +86,7 @@ local RAID_ZONE_IDS = {
 	[6] = { -- Legion
 		--, -- The Nighthold
 		1520, -- The Emerald Nightmare
+		1648, -- Trial of Valor
 	},
 }
 

@@ -11,13 +11,13 @@ ignore:
 
 externals:
     vendor/Ace3:
-        url: svn://svn.wowace.com/wow/ace3/mainline/trunk
+        url: https://repos.wowace.com/wow/ace3/trunk
         tag: Release-r1151
     vendor/LibGroupInSpecT-1.1:
-        url: svn://svn.wowace.com/wow/libgroupinspect/mainline/trunk
+        url: https://repos.wowace.com/wow/libgroupinspect/trunk
         tag: 1.2.1
     vendor/LibDBIcon-1.0:
-        url: svn://svn.wowace.com/wow/libdbicon-1-0/mainline/trunk
+        url: https://repos.wowace.com/wow/libdbicon-1-0/trunk
         tag: r54-release
 
 tools-used:

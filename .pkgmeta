@@ -1,13 +1,10 @@
 package-as: GuildSkadaHighScore
 
+enable-nolib-creation: no
+
 manual-changelog: 
     filename: VERSION_CHANGES.md
     markup-type: markdown
-
-ignore:
-  - vendor/Ace3
-  - vendor/LibDBIcon-1.0
-  - vendor/LibGroupInSpecT-1.1
 
 externals:
     vendor/Ace3:

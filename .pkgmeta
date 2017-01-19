@@ -6,6 +6,9 @@ manual-changelog:
     filename: VERSION_CHANGES.md
     markup-type: markdown
 
+ignore:
+    - vendor/Ace3/tests
+
 externals:
     vendor/Ace3:
         url: https://repos.wowace.com/wow/ace3/trunk

@@ -1,3 +1,7 @@
+# Version 1.0.11 (2017-01-19)
+
+* Added tracking of The Nighthold.
+
 # Version 1.0.10 (2016-11-09)
 
 * Added tracking of Trial of Valor.

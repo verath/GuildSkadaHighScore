@@ -1,5 +1,3 @@
-Version 1.0.10 (2016-11-09)
+Version 1.0.11 (2017-01-19)
 
-* Added tracking of Trial of Valor.
-* Now also tracks kills when not in a guild. These entries are grouped under a guild called "<No Guild>".
-
+* Added tracking of The Nighthold.

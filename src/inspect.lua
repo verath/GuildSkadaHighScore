@@ -35,6 +35,9 @@ local GetInventoryItemLink = GetInventoryItemLink;
 -- LibGroupInSpecT, lib handling inspection of group members
 local LGIST = LibStub("LibGroupInSpecT-1.1")
 
+-- Disable the LGIST debug output
+LGIST.debug = false
+
 -- Set up module
 local addon = addonTable[1];
 local inspect = addon:NewModule("inspect", "AceEvent-3.0", "AceTimer-3.0")

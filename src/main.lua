@@ -87,6 +87,7 @@ local RAID_ZONE_IDS = {
 		1520, -- The Emerald Nightmare
 		1648, -- Trial of Valor
 		1530, -- The Nighthold
+		1676, -- Tomb of Sargeras
 	},
 }
 

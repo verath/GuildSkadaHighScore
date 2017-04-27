@@ -3,7 +3,6 @@
 * Bump TOC for 7.2
 * Added tracking of Tomb of Sargeras
 
-
 # Version 1.0.11 (2017-01-19)
 
 * Added tracking of The Nighthold.

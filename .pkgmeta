@@ -8,6 +8,8 @@ manual-changelog:
 
 ignore:
     - vendor/Ace3/tests
+    - README.md
+    - .github
 
 externals:
     vendor/Ace3:

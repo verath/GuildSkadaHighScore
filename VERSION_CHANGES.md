@@ -1,4 +1,4 @@
-Version 1.0.12 (2017-03-28)
+Version 1.0.13 (2017-06-21)
 
-* Bump TOC for 7.2
-* Added tracking of Tomb of Sargeras
+* Bump for 7.2.5
+* Updated dependencies

@@ -20,7 +20,7 @@ externals:
         tag: 1.2.1
     vendor/LibDBIcon-1.0:
         url: https://repos.wowace.com/wow/libdbicon-1-0/trunk
-        tag: r54-release
+        tag: r56-release
 
 tools-used:
     - findglobals

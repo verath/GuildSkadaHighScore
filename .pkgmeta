@@ -14,7 +14,7 @@ ignore:
 externals:
     vendor/Ace3:
         url: https://repos.wowace.com/wow/ace3/trunk
-        tag: Release-r1158
+        tag: Release-r1182
     vendor/LibGroupInSpecT-1.1:
         url: https://repos.wowace.com/wow/libgroupinspect/trunk
         tag: 1.2.1

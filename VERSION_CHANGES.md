@@ -1,4 +1,5 @@
-Version 1.0.13 (2017-06-21)
+Version x.y.z (TBD)
 
-* Bump for 7.2.5
+* Bump for 8.0.0
 * Updated dependencies
+* Added Antorus to tracked raids

@@ -22,4 +22,4 @@ externals:
 tools-used:
     - findglobals
     - libdatabroker-1-1
-    - LibGroupInSpecT-1.1
+    - libgroupinspect

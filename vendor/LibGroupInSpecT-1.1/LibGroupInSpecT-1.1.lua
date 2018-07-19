@@ -63,6 +63,7 @@
 --]]
 
 local MAJOR, MINOR = "LibGroupInSpecT-1.1", tonumber (("$Revision: 86 $"):match ("(%d+)") or 0)
+MINOR = 9999
 
 if not LibStub then error(MAJOR.." requires LibStub") end
 local lib = LibStub:NewLibrary (MAJOR, MINOR)
@@ -253,7 +254,7 @@ function lib:PLAYER_LOGIN ()
   frame:RegisterEvent ("UNIT_NAME_UPDATE")
   frame:RegisterEvent ("UNIT_AURA")
   frame:RegisterEvent ("CHAT_MSG_ADDON")
-  RegisterAddonMessagePrefix (COMMS_PREFIX)
+  C_ChatInfo.RegisterAddonMessagePrefix(COMMS_PREFIX)
 
   local guid = UnitGUID ("player")
   local info = self:BuildInfo ("player")
@@ -638,7 +639,7 @@ function lib:SendLatestSpecData ()
 
   --[===[@debug@
   debug ("Sending LGIST update to "..scope) --@end-debug@]===]
-  SendAddonMessage(COMMS_PREFIX, datastr, scope)
+  C_ChatInfo.SendAddonMessage(COMMS_PREFIX, datastr, scope)
 end
 
 

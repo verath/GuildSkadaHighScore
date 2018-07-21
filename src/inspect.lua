@@ -26,6 +26,7 @@ local max = max;
 local ipairs = ipairs;
 local pairs = pairs;
 local tContains = tContains;
+local tinsert = tinsert;
 local UnitIsUnit = UnitIsUnit;
 local UnitGUID = UnitGUID;
 local GetAverageItemLevel = GetAverageItemLevel;
@@ -70,84 +71,54 @@ local INVENTORY_SLOT_IDS = {
 -- The number of slots used for item level
 local NUM_INVENTORY_SLOT_IDS = #INVENTORY_SLOT_IDS;
 
--- List of ids for the main hand artifact weapons that
--- also uses an off-hand. Used for item level calculations,
--- as one item in the pair seems to be ilvl 750.
-local MAINHAND_OFFHAND_ARTIFACT_IDS = {
-	128292, -- Death Knight, Frost (Frostreaper)
-	127829, -- Demon Hunter, Havoc (Verus)
-	128832, -- Demon Hunter, Vengeance (Aldrachi Warblades)
-	128860, -- Druid, Feral (Fangs of Ashamane)
-	128821, -- Druid, Guardian (Claws of Ursoc)
-	128820, -- Mage, Fire (Felo'melorn)
-	128940, -- Monk, Windwalker (Al'burq)
-	128867, -- Paladin, Protection (Oathseeker)
-	128827, -- Priest, Shadow (Xal'atath, Blade of the Black Empire)
-	128870, -- Rogue, Assassination (Anguish)
-	128872, -- Rogue, Outlaw (Fate)
-	128476, -- Rogue, Subtlety (Gorefang)
-	128935, -- Shaman, Elemental (The Fist of Ra-den)
-	128819, -- Shaman, Enhancement (Doomhammer)
-	128911, -- Shaman, Restoration (Sharas'dal, Scepter of Tides)
-	137246, -- Warlock, Demonology (Spine of Thal'kiel)
-	128908, -- Warrior, Fury (Odyn's Fury)
-	128288, -- Warrior, Protection (Scaleshard)
-};
-
-
--- Checks if the unitName uses a mh+oh artifact weapon by comparing
--- the itemId of the mainhand to MAINHAND_OFFHAND_ARTIFACT_IDS.
-local function hasMainHandOffHandArtifact(unitName)
-	local mhItemId = GetInventoryItemID(unitName, INVSLOT_MAINHAND);
-	return tContains(MAINHAND_OFFHAND_ARTIFACT_IDS, mhItemId)
+-- Takes a list of Items and a callback and calls the callback
+-- when all items has been loaded.
+local function loadAllItems(items, callback)
+	local remaining = #items
+	if remaining < 1 then
+		callback();
+	end
+	for _, item in pairs(items) do
+		item:ContinueOnItemLoad(function()
+			remaining = remaining - 1;
+			if remaining == 0 then
+				callback();
+			end
+		end)
+	end
 end
 
--- Attempts to get the item level of the provided unitName.
--- The unitName must either be "player" or a unit currently being
--- inspected.
-function inspect:GetItemLevel(unitName)
-	if unitName == "player" or UnitIsUnit(unitName, "player") then
-		local _, equipped = GetAverageItemLevel();
-		return floor(equipped);
-	else
-		local slotItemLevel = {};
-		for _, slotId in ipairs(INVENTORY_SLOT_IDS) do
-			local itemLevel;
-			local itemLink = GetInventoryItemLink(unitName, slotId);
-			if itemLink then
-				itemLevel = GetDetailedItemLevelInfo(itemLink);
-			end
-			-- If we cannot get the item level for a slot we consider this
-			-- failed, likely due to item information not being available 
-			-- yet. An exception is the off-hand slot, which is empty for 
-			-- 2h weps.
-			if not itemLevel and slotId ~= INVSLOT_OFFHAND then
-				return nil;
-			end
-			slotItemLevel[slotId] = itemLevel;
-		end
+-- Attempts to get the item level of the provided unitName and
+-- calls the provided callback with a best effort estimate of
+-- the equipped item level of unitName. unitName must be the
+-- unit currently being inspected.
+function inspect:GetUnitItemLevel(unitName, callback)
+	self:Debug("GetUnitItemLevel(" .. unitName .. ")")
 
-		-- If we don't have an off-hand, assume we are using a 2h weapon.
-		-- Setting the item level of the empty off-hand slot to that of the
-		-- 2h weapon seems to match the in-game avg item level.
-		if not slotItemLevel[INVSLOT_OFFHAND] then
-			slotItemLevel[INVSLOT_OFFHAND] = slotItemLevel[INVSLOT_MAINHAND];
+	local slotItems = {}
+	local isUsingTwoHandWeapon = false;
+	for _, slotId in ipairs(INVENTORY_SLOT_IDS) do
+		local itemLink = GetInventoryItemLink(unitName, slotId);
+		if itemLink then
+			tinsert(slotItems, Item:CreateFromItemLink(itemLink));
+		elseif slotId == INVSLOT_OFFHAND then
+			-- Failed to get item link for off-hand, assume 2h wep
+			isUsingTwoHandWeapon = true
 		end
-
-		-- HACK(2016-10-26, 7.1.0): Check for MH+OH artifacts, and set
-		-- item level for both to the highest of the two.
-		if hasMainHandOffHandArtifact(unitName) then
-			local artifactItemLevel = max(slotItemLevel[INVSLOT_MAINHAND], slotItemLevel[INVSLOT_OFFHAND]);
-			slotItemLevel[INVSLOT_MAINHAND] = artifactItemLevel;
-			slotItemLevel[INVSLOT_OFFHAND] = artifactItemLevel;
-		end
-
-		local total = 0;
-		for _, itemLevel in pairs(slotItemLevel) do
-			total = total + itemLevel;
-		end
-		return floor(total / NUM_INVENTORY_SLOT_IDS);
 	end
+
+	local numItems = NUM_INVENTORY_SLOT_IDS
+	if isUsingTwoHandWeapon then
+		numItems = numItems - 1;
+	end
+	loadAllItems(slotItems, function()
+		local totalItemLevel = 0;
+		for _, item in pairs(slotItems) do
+			local itemLevel = item:GetCurrentItemLevel() or 0;
+			totalItemLevel = totalItemLevel + itemLevel;
+		end
+		callback(floor(totalItemLevel / numItems))
+	end);
 end
 
 -- Updates the playerInfo for the local player. This does not require
@@ -159,8 +130,8 @@ function inspect:UpdateLocalPlayerItemLevel()
 	self.playerInfo[guid] = self.playerInfo[guid] or {};
 	local playerInfo = self.playerInfo[guid];
 
-	local itemLevel = self:GetItemLevel("player");
-	playerInfo["itemLevel"] = itemLevel;
+	local _, itemLevel = GetAverageItemLevel();
+	playerInfo["itemLevel"] = floor(itemLevel);
 end
 
 -- Helper method for getting inspect data for a single player,
@@ -186,7 +157,7 @@ function inspect:GetInspectDataForPlayer(player)
 			player["role"] = playerInfo["specRole"];
 		end
 
-		--self:Debug("inspect:GetInspectDataForPlayer", "success", player["specName"], player["itemLevel"], player["role"]);
+		self:Debug("inspect:GetInspectDataForPlayer", "success", player["specName"], player["itemLevel"], player["role"]);
 	else
 		self:Debug("inspect:GetInspectDataForPlayer", "fail");
 	end
@@ -223,10 +194,12 @@ function inspect:GroupInSpecT_InspectReady(evt, guid, unit)
 	-- item changes. However, as LGIST might re-inspect players
 	-- frequently, we instead optimize for the case where players 
 	-- do not change their item levels.
-	local itemLevel = self:GetItemLevel(unit);
-	if itemLevel then
-		playerInfo["itemLevel"] = itemLevel;
-	end
+	self:GetUnitItemLevel(unit, function(itemLevel)
+		addon:Debug("GetUnitItemLevel callback(" .. itemLevel .. ")")
+		if playerInfo and itemLevel and itemLevel > 0 then
+			playerInfo["itemLevel"] = itemLevel;
+		end
+	end);
 end
 
 -- LGIST event for when info for a player is ready or has been modified.

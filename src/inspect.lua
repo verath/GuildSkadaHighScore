@@ -180,20 +180,21 @@ end
 function inspect:GroupInSpecT_InspectReady(evt, guid, unit)
 	-- As getting the itemLevel can be slow, we don't perform this
 	-- action for players that are not currently part of our guild.
-	if not addon:IsInMyGuild(unit) then
+	-- We also don't need to perform our own inspect for the local
+	-- player, as that is instead done on PLAYER_EQUIPMENT_CHANGED.
+	if (not addon:IsInMyGuild(unit)) or UnitIsUnit(unit, "player") then
 		return;
 	end
 
 	self.playerInfo[guid] = self.playerInfo[guid] or {};
 	local playerInfo = self.playerInfo[guid];
 
-	-- Getting the item level is unreliable, as it requires
-	-- proximity to the target (among other things?). Because
-	-- of that we keep the old itemLevel if we can not get a 
-	-- new one. This might mean that we don't pick up on all
-	-- item changes. However, as LGIST might re-inspect players
-	-- frequently, we instead optimize for the case where players 
-	-- do not change their item levels.
+	-- Getting the item level is unreliable, as it requires proximity
+	-- to the target (among other things?). Because of that we keep
+	-- the old itemLevel even if we can not get a new one. This might
+	-- mean that we don't pick up on all item changes. However, as
+	-- LGIST might re-inspect players frequently, we instead optimize
+	-- for the case where players do not change their item levels.
 	self:GetUnitItemLevel(unit, function(itemLevel)
 		addon:Debug("GetUnitItemLevel callback(" .. itemLevel .. ")")
 		if playerInfo and itemLevel and itemLevel > 0 then

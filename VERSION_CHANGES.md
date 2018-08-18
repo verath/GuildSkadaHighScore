@@ -1,5 +1,3 @@
-Version 1.0.14 (2018-07-23)
+Version 1.0.15 (2018-08-18)
 
-* Bump for 8.0.0
-* Updated dependencies
-* Added Antorus to tracked raids
+* Added Uldir to tracked raids

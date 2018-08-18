@@ -1,3 +1,7 @@
+# Version 1.0.15 (2018-08-18)
+
+* Added Uldir to tracked raids
+
 # Version 1.0.14 (2018-07-23)
 
 * Bump for 8.0.0

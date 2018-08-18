@@ -70,8 +70,6 @@ function mod:GetParsesForEncounter(encounter, callback)
 end
 
 function mod:EndSegment()
-	self:Debug("Skada: EndSegment")
-
 	-- If we have requests waiting for EndSegment, process them now.
 	if #self.pendingParseRequests then
 		for _, pendingRequest in ipairs(self.pendingParseRequests) do

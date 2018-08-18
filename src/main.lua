@@ -147,7 +147,8 @@ end
 
 -- Tests if a zone is in the addon's tracked zones.
 function addon:IsTrackedZone(zoneId)
-	return tContains(self.trackedZones, zoneId);
+	local trackedZones = (self.trackedZones or {});
+	return tContains(trackedZones, zoneId);
 end
 
 -- Creates the "database" via AceDB

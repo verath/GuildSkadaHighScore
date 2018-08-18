@@ -90,6 +90,9 @@ local RAID_ZONE_IDS = {
 		1676, -- Tomb of Sargeras
 		1712, -- Antorus
 	},
+	[7] = { -- Battle for Azeroth
+		1861, -- Uldir
+	}
 }
 
 

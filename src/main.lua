@@ -92,6 +92,8 @@ local RAID_ZONE_IDS = {
 	},
 	[7] = { -- Battle for Azeroth
 		1861, -- Uldir
+		2070, -- Battle of Dazar'alor
+		2096, -- Crucible of Storms
 	}
 }
 

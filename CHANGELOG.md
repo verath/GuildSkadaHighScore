@@ -1,3 +1,7 @@
+# Version 1.0.16 (2019-02-25)
+
+* Added Crucible of Storms and Battle of Dazar'alor to tracked raids
+
 # Version 1.0.15 (2018-08-18)
 
 * Added Uldir to tracked raids

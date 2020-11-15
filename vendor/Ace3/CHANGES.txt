@@ -1,111 +1,93 @@
 ------------------------------------------------------------------------
-r1181 | nevcairiel | 2018-07-17 12:42:59 +0000 (Tue, 17 Jul 2018) | 1 line
-Changed paths:
-   M /trunk/changelog.txt
-
-Update changelog
-------------------------------------------------------------------------
-r1180 | nevcairiel | 2018-07-17 12:42:35 +0000 (Tue, 17 Jul 2018) | 1 line
+r1240 | nevcairiel | 2020-10-13 07:59:32 +0000 (Tue, 13 Oct 2020) | 1 line
 Changed paths:
    M /trunk/Ace3.toc
+   M /trunk/changelog.txt
 
-Update TOC for 8.0
+Update changelog and TOC
 ------------------------------------------------------------------------
-r1179 | nevcairiel | 2018-07-15 09:03:08 +0000 (Sun, 15 Jul 2018) | 1 line
+r1239 | nevcairiel | 2020-09-20 10:22:02 +0000 (Sun, 20 Sep 2020) | 1 line
 Changed paths:
-   M /trunk/AceGUI-3.0/widgets/AceGUIWidget-CheckBox.lua
+   M /trunk/AceGUI-3.0/widgets/AceGUIWidget-DropDown.lua
 
-AceGUI-3.0: Checkbox: Restore previous width setting, or wrap doesn't work properly
+AceGUI-3.0: DropDown: Anchor all items to the dropdown frame instead of chaining anchors, fixes anchoring on WoW 9.0 with many items
 ------------------------------------------------------------------------
-r1178 | nevcairiel | 2018-07-15 08:56:23 +0000 (Sun, 15 Jul 2018) | 1 line
+r1238 | nevcairiel | 2020-08-28 16:18:42 +0000 (Fri, 28 Aug 2020) | 3 lines
 Changed paths:
-   M /trunk/AceGUI-3.0/widgets/AceGUIWidget-CheckBox.lua
+   M /trunk/AceAddon-3.0/AceAddon-3.0.lua
 
-AceGUI-3.0: Checkbox: Change internal anchoring to work around a layout issue in WoW 8.0/BfA
+AceAddon-3.0: Blacklist more Blizzard addons from triggering Ace3 load events
+
+These addons can be loaded very early by UIParent, which causes issues with loading certain addons
 ------------------------------------------------------------------------
-r1177 | nevcairiel | 2018-06-25 12:12:48 +0000 (Mon, 25 Jun 2018) | 1 line
+r1237 | nevcairiel | 2020-07-17 22:50:38 +0000 (Fri, 17 Jul 2020) | 1 line
 Changed paths:
-   M /trunk/AceGUI-3.0/AceGUI-3.0.lua
+   M /trunk/AceGUI-3.0/widgets/AceGUIContainer-DropDownGroup.lua
+   M /trunk/AceGUI-3.0/widgets/AceGUIContainer-Frame.lua
+   M /trunk/AceGUI-3.0/widgets/AceGUIContainer-InlineGroup.lua
+   M /trunk/AceGUI-3.0/widgets/AceGUIContainer-TabGroup.lua
+   M /trunk/AceGUI-3.0/widgets/AceGUIContainer-TreeGroup.lua
+   M /trunk/AceGUI-3.0/widgets/AceGUIWidget-DropDown.lua
+   M /trunk/AceGUI-3.0/widgets/AceGUIWidget-Keybinding.lua
+   M /trunk/AceGUI-3.0/widgets/AceGUIWidget-MultiLineEditBox.lua
+   M /trunk/AceGUI-3.0/widgets/AceGUIWidget-Slider.lua
 
-Update TableLayout to a version with less memory requirements
+Use BackdropTemplate in WoW 9.0
 ------------------------------------------------------------------------
-r1176 | nevcairiel | 2018-06-23 08:36:22 +0000 (Sat, 23 Jun 2018) | 1 line
+r1236 | nevcairiel | 2020-04-16 07:36:45 +0000 (Thu, 16 Apr 2020) | 1 line
 Changed paths:
-   M /trunk/AceGUI-3.0/AceGUI-3.0.lua
+   M /trunk/AceGUI-3.0/widgets/AceGUIWidget-DropDown.lua
 
-AceGUI-3.0: Implement a Table Layout (#442)
+AceGUI-3.0: DropDown: Initialize the widget with an empty item list (instead of nil), this allows AddItem to be used right away (Fixes #542)
 ------------------------------------------------------------------------
-r1175 | h.leppkes@gmail.com | 2018-05-15 01:21:47 +0000 (Tue, 15 May 2018) | 1 line
-Changed paths:
-   M /trunk/AceGUI-3.0/widgets/AceGUIWidget-EditBox.lua
-
-AceGUI-3.0: EditBox: Only try to handle dragging if a valid object is being dragged into the text box
-------------------------------------------------------------------------
-r1174 | h.leppkes@gmail.com | 2018-05-14 17:29:49 +0000 (Mon, 14 May 2018) | 1 line
-Changed paths:
-   M /trunk/AceComm-3.0/AceComm-3.0.lua
-
-AceComm-3.0: Support numeric targets for custom channels (Ticket #419)
-------------------------------------------------------------------------
-r1173 | nevcairiel | 2018-04-20 21:27:55 +0000 (Fri, 20 Apr 2018) | 4 lines
+r1235 | nevcairiel | 2020-04-15 10:27:55 +0000 (Wed, 15 Apr 2020) | 1 line
 Changed paths:
    M /trunk/AceGUI-3.0/widgets/AceGUIContainer-TreeGroup.lua
 
-AceGUI-3.0: TreeGroup: Work around a lag issue related to TreeGroups in WoW 8.0
-
-Basically, TreeGroups cause a hefty lag spike in RefreshTree if they are a child of UIParent (ie. not in a layout yet), and are not anchored to anything.
-To avoid this spike, skip a refresh in this situation and schedule a new one on the next frame.
+Cleanup debug
 ------------------------------------------------------------------------
-r1172 | nevcairiel | 2018-04-20 10:57:25 +0000 (Fri, 20 Apr 2018) | 1 line
+r1234 | nevcairiel | 2020-04-15 10:14:35 +0000 (Wed, 15 Apr 2020) | 1 line
 Changed paths:
-   M /trunk/AceComm-3.0/ChatThrottleLib.lua
+   M /trunk/AceGUI-3.0/widgets/AceGUIContainer-TreeGroup.lua
 
-Missed one spot in ChatThrottleLib
+AceGUI-3.0: TreeGroup: Remove pre-8.0 compat
 ------------------------------------------------------------------------
-r1171 | nevcairiel | 2018-04-20 07:33:22 +0000 (Fri, 20 Apr 2018) | 1 line
+r1233 | nevcairiel | 2020-04-15 10:09:47 +0000 (Wed, 15 Apr 2020) | 1 line
 Changed paths:
-   M /trunk/AceComm-3.0/AceComm-3.0.lua
-   M /trunk/AceComm-3.0/ChatThrottleLib.lua
+   M /trunk/AceGUI-3.0/widgets/AceGUIWidget-Label.lua
 
-Update AceComm and CTL for WoW 8.0
+AceGUI-3.0: Label: Refresh anchoring after changing the font (Fixes #540)
 ------------------------------------------------------------------------
-r1170 | funkydude | 2018-03-29 17:38:58 +0000 (Thu, 29 Mar 2018) | 1 line
-Changed paths:
-   M /trunk/AceTimer-3.0/AceTimer-3.0.lua
-
-AceTimer: Initialize the timer table with the majority of values already set, replace some pairs calls with next calls.
-------------------------------------------------------------------------
-r1169 | nevcairiel | 2018-02-27 16:18:28 +0000 (Tue, 27 Feb 2018) | 6 lines
-Changed paths:
-   M /trunk/AceConfig-3.0/AceConfigDialog-3.0/AceConfigDialog-3.0.lua
-   M /trunk/AceConfig-3.0/AceConfigRegistry-3.0/AceConfigRegistry-3.0.lua
-
-AceConfig-3.0: Allow number values for the "width" parameter, which acts as a multiplier of the default width
-
-A multiplier is used instead of a fixed width in pixels to allow more flexible handling in various AceConfig containers, where default widget width may vary.
-In this design, a numeric value of 0.5 would equal "half", and 2.0 would equal "double", but allowing finer granularity in between as well.
-
-Patch provided by Infus.
-------------------------------------------------------------------------
-r1168 | nevcairiel | 2017-10-01 08:05:04 +0000 (Sun, 01 Oct 2017) | 1 line
+r1232 | nevcairiel | 2020-04-14 22:21:22 +0000 (Tue, 14 Apr 2020) | 1 line
 Changed paths:
    M /trunk/AceConfig-3.0/AceConfigDialog-3.0/AceConfigDialog-3.0.lua
 
-AceConfigDialog-3.0: Enable iconCoords for the main level of a tree group (Ticket #417)
+AceConfigDialog-3.0: Prevent a dialog refresh when a multiselect control is closed during release (Fixes #539)
 ------------------------------------------------------------------------
-r1167 | funkydude | 2017-08-29 22:08:48 +0000 (Tue, 29 Aug 2017) | 1 line
+r1231 | nevcairiel | 2020-04-14 22:20:36 +0000 (Tue, 14 Apr 2020) | 1 line
 Changed paths:
-   M /trunk/AceConfig-3.0/AceConfigDialog-3.0/AceConfigDialog-3.0.lua
-   M /trunk/AceGUI-3.0/widgets/AceGUIContainer-Frame.lua
-   M /trunk/AceGUI-3.0/widgets/AceGUIContainer-TabGroup.lua
-   M /trunk/AceGUI-3.0/widgets/AceGUIContainer-Window.lua
-   M /trunk/AceGUI-3.0/widgets/AceGUIWidget-Button.lua
-   M /trunk/AceGUI-3.0/widgets/AceGUIWidget-CheckBox.lua
-   M /trunk/AceGUI-3.0/widgets/AceGUIWidget-DropDown-Items.lua
-   M /trunk/AceGUI-3.0/widgets/AceGUIWidget-DropDown.lua
-   M /trunk/AceGUI-3.0/widgets/AceGUIWidget-EditBox.lua
-   M /trunk/AceGUI-3.0/widgets/AceGUIWidget-Slider.lua
+   M /trunk/AceGUI-3.0/AceGUI-3.0.lua
 
-Remove PlaySound compat code.
+AceGUI-3.0: Add a getter to allow callers to check if a widget is currently being released, which can be used as part of some callbacks to alter behavior
+------------------------------------------------------------------------
+r1230 | funkydude | 2020-01-14 17:01:25 +0000 (Tue, 14 Jan 2020) | 1 line
+Changed paths:
+   M /trunk/Ace3.toc
+
+bump toc
+------------------------------------------------------------------------
+r1229 | funkydude | 2019-10-11 20:48:50 +0000 (Fri, 11 Oct 2019) | 1 line
+Changed paths:
+   M /trunk/Ace3.toc
+
+bump toc
+------------------------------------------------------------------------
+r1228 | nevcairiel | 2019-09-06 08:51:17 +0000 (Fri, 06 Sep 2019) | 3 lines
+Changed paths:
+   M /trunk/AceGUI-3.0/AceGUI-3.0.lua
+
+AceGUI-3.0: Avoid re-entrance into the Release function
+
+This can happen if a frame is released in a callback fired in the release process, and may in some cases throw errors.
 ------------------------------------------------------------------------
 

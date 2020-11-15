@@ -10,13 +10,13 @@ ignore:
 externals:
     vendor/Ace3:
         url: https://repos.wowace.com/wow/ace3/trunk
-        tag: Release-r1182
+        tag: Release-r1241
     vendor/LibGroupInSpecT-1.1:
         url: https://repos.wowace.com/wow/libgroupinspect/trunk
-        tag: r92-alpha
+        tag: r98-alpha
     vendor/LibDBIcon-1.0:
         url: https://repos.wowace.com/wow/libdbicon-1-0/trunk
-        tag: r64-release
+        tag: v9.0.0
 
 tools-used:
     - findglobals

@@ -161,6 +161,7 @@ function options:GetOptionsTable()
 end
 
 function options:ShowOptionsFrame()
+	InterfaceOptionsFrame_Show();
 	InterfaceOptionsFrame_OpenToCategory(self.optionsFrame);
 end
 

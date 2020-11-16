@@ -24,6 +24,9 @@ addon.dbDefaults.realm.options = {
 	purgeEnabled = false,
 	purgeMaxParseAge = 30,
 	purgeMinPlayerParsesPerFight = 2,
+	instanceTrackDecisions = { 
+		-- instanceId => [instanceName, shouldTrack]	
+	},
 }
 
 local optionsTable;
@@ -120,6 +123,26 @@ local function createOptionsTable()
 					}
 				},
 			},
+			trackDecisions = {
+				name = "Tracked Raids",
+				desc = "Parses are recorded for selected raid zones.",
+				type = "multiselect",
+				width = "full",
+				order = 40,
+				values = function()
+					local trackDecisions = {};
+					for instanceId, trackDecision in pairs(addon.db.realm.options["instanceTrackDecisions"]) do
+						trackDecisions[instanceId] = string.format("%s [%d]", trackDecision.instanceName, instanceId);
+					end
+					return trackDecisions;
+				end,
+				get = function(_, instanceId)
+					return addon.db.realm.options["instanceTrackDecisions"][instanceId].shouldTrack;
+				end,
+				set = function(_, instanceId, state)
+					addon.db.realm.options["instanceTrackDecisions"][instanceId].shouldTrack = state;
+				end,
+			},
 			creditsSeparator = {
 				name = "",
 				order = -1,
@@ -179,6 +202,30 @@ end
 
 function options:GetPurgeMinPlayerParsesPerFight()
 	return addon.db.realm.options["purgeMinPlayerParsesPerFight"];
+end
+
+function options:HasInstanceTrackDecision(instanceId)
+	return addon.db.realm.options["instanceTrackDecisions"][instanceId] ~= nil
+end
+
+function options:GetInstanceTrackDecision(instanceId)
+	local trackDecision = addon.db.realm.options["instanceTrackDecisions"][instanceId]
+	local trackDecisionCopy = nil;
+	if trackDecision ~= nil then
+		trackDecisionCopy = {
+			instanceName = trackDecision.instanceName,
+			shouldTrack = trackDecision.shouldTrack,
+		};
+	end
+	return trackDecisionCopy;
+end
+
+function options:SetInstanceTrackDecision(instanceId, instanceName, shouldTrack)
+	local trackDecision = {
+		instanceName = instanceName,
+		shouldTrack = shouldTrack,
+	};
+	addon.db.realm.options["instanceTrackDecisions"][instanceId] = trackDecision;
 end
 
 function options:OnEnable()

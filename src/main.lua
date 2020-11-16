@@ -73,38 +73,6 @@ local DEBUG_PRINT = false
 DEBUG_PRINT = true;
 --@end-debug@
 
--- A list of raid instance map ids, grouped by expansion id.
--- This list is used to determine if parses for a zone should
--- be added.
--- See: http://wow.gamepedia.com/InstanceMapID
-local RAID_ZONE_IDS = {
-	[5] = { -- WoD
-		1228, -- Highmaul
-		1205, -- Blackrock Foundry
-		1448, -- Hellfire Citadel
-	},
-	[6] = { -- Legion
-		1520, -- The Emerald Nightmare
-		1648, -- Trial of Valor
-		1530, -- The Nighthold
-		1676, -- Tomb of Sargeras
-		1712, -- Antorus
-	},
-	[7] = { -- Battle for Azeroth
-		1861, -- Uldir
-		2070, -- Battle of Dazar'alor
-		2096, -- Crucible of Storms
-	}
-}
-
-
--- Takes an expansionId and returns the raid zone ids for that
--- expansion, or an empty table for unknown expansionIds
-local function getRaidZonesByExpansionId(expansionId)
-	return RAID_ZONE_IDS[expansionId] or {};
-end
-
-
 -- A wrapper around :Pring that only prints if the
 -- DEBUG_PRINT flag is set to true.
 function addon:Debug(...)
@@ -151,9 +119,15 @@ function addon:IsInMyGuild(playerName)
 end
 
 -- Tests if a zone is in the addon's tracked zones.
-function addon:IsTrackedZone(zoneId)
-	local trackedZones = (self.trackedZones or {});
-	return tContains(trackedZones, zoneId);
+function addon:IsTrackedZone(instanceId)
+	local trackDecision = self.options:GetInstanceTrackDecision(instanceId);
+	if trackDecision then
+		self:Debug("IsTrackedZone: trackDecision.shouldTrack = ", trackDecision.shouldTrack);
+		return (trackDecision.shouldTrack == true);
+	else
+		self:Debug("IsTrackedZone: no trackDecision.");
+		return false;
+	end
 end
 
 -- Creates the "database" via AceDB
@@ -240,14 +214,29 @@ function addon:ENCOUNTER_END(evt, encounterId, encounterName, difficultyId, raid
 	end
 end
 
+function addon:OnZoneChanged(evt)
+	local instanceName, instanceType, _, _, _, _, _, instanceId = GetInstanceInfo();
+	if instanceType ~= "raid" then
+		return;
+	end
+	if self.options:HasInstanceTrackDecision(instanceId) then
+		self:Debug("OnZoneChanged: Already has instance track decision");
+	else
+		self.options:SetInstanceTrackDecision(instanceId, instanceName, true)
+		self:Printf("Added '%s' (%d) to Tracked Raids, it can be deselected in GSHS config.", instanceName, instanceId)
+	end
+end
+
 function addon:OnInitialize()
 	self:SetupDatabase();
 end
 
 function addon:OnEnable()
-	self.trackedZones = getRaidZonesByExpansionId(GetExpansionLevel())
-
 	self:RegisterEvent("ENCOUNTER_END")	
+	self:RegisterEvent("ZONE_CHANGED", "OnZoneChanged")
+	self:RegisterEvent("ZONE_CHANGED_INDOORS", "OnZoneChanged")
+	self:RegisterEvent("ZONE_CHANGED_NEW_AREA", "OnZoneChanged")
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnZoneChanged")
 	self:RegisterChatCommand("gshs", function(arg)
 		if arg == "config" then
 			self.options:ShowOptionsFrame();
@@ -267,8 +256,10 @@ function addon:OnEnable()
 end
 
 function addon:OnDisable()
-	self.trackedZones = nil;
-
 	self:UnregisterEvent("ENCOUNTER_END")
+	self:UnregisterEvent("ZONE_CHANGED")
+	self:UnregisterEvent("ZONE_CHANGED_INDOORS")
+	self:UnregisterEvent("ZONE_CHANGED_NEW_AREA")
+	self:UnregisterEvent("PLAYER_ENTERING_WORLD")
 	self:UnregisterChatCommand("gshs");
 end

@@ -1,3 +1,14 @@
+# Version 1.0.18 (2020-11-16)
+
+* Updated for WoW patch 9.0.1.
+* Automatically track all raid zones, add option to disable tracking of
+  specific raids to the settings UI.
+* Updated dependencies.
+
+# Version 1.0.17 (2019-02-26)
+
+* Bump TOC for 8.1
+
 # Version 1.0.16 (2019-02-25)
 
 * Added Crucible of Storms and Battle of Dazar'alor to tracked raids

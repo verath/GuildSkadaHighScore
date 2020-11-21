@@ -10,7 +10,7 @@ ignore:
 externals:
     vendor/Ace3:
         url: https://repos.wowace.com/wow/ace3/trunk
-        tag: Release-r1241
+        tag: r1244-alpha
     vendor/LibGroupInSpecT-1.1:
         url: https://repos.wowace.com/wow/libgroupinspect/trunk
         tag: r98-alpha

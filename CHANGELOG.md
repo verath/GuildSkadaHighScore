@@ -1,4 +1,4 @@
-# Version 1.0.18 (UNRELEASED)
+# Version 1.0.18 (2020-11-27)
 
 * Updated for WoW patch 9.0.2.
 * Automatically track all raid zones, add option to disable tracking of

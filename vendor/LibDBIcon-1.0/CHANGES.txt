@@ -1,11 +1,5 @@
 ------------------------------------------------------------------------
-r84 | funkehdude | 2020-11-10 03:14:49 +0000 (Tue, 10 Nov 2020) | 1 line
-Changed paths:
-   M /trunk/LibDBIcon-1.0/LibDBIcon-1.0.lua
-
-Use SetFixedFrameStrata & SetFixedFrameLevel if available.
-------------------------------------------------------------------------
-r83 | funkehdude | 2020-11-10 02:57:39 +0000 (Tue, 10 Nov 2020) | 1 line
+r86 | funkehdude | 2020-11-23 17:11:49 +0000 (Mon, 23 Nov 2020) | 1 line
 Changed paths:
    M /trunk/LibDBIcon-1.0.toc
 

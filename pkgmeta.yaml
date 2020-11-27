@@ -16,7 +16,7 @@ externals:
         tag: r98-alpha
     vendor/LibDBIcon-1.0:
         url: https://repos.wowace.com/wow/libdbicon-1-0/trunk
-        tag: v9.0.0
+        tag: v9.0.1
 
 tools-used:
     - findglobals

@@ -11,7 +11,7 @@ local LibDBIcon = LibStub("LibDBIcon-1.0");
 
 -- Set up module
 local addon = addonTable[1];
-local ldb = addon:NewModule("ldb")
+local ldb = addon:NewModule("ldb", "AceEvent-3.0")
 addon.ldb = ldb;
 
 -- DB defaults
@@ -47,10 +47,36 @@ function ldb:OnClick(clickedframe, button)
 	end
 end
 
+function ldb:UpdateByZoneTrackDecision()
+	local instanceId = select(8, GetInstanceInfo());
+	local trackDecision = addon.options:GetInstanceTrackDecision(instanceId);
+	self.inTrackedZone = trackDecision and trackDecision.shouldTrack;
+	if self.inTrackedZone then
+		self.dataObject.iconR = 1;
+		self.dataObject.iconG = 1;
+		self.dataObject.iconB = 1;
+	else
+		self.dataObject.iconR = 0.5;
+		self.dataObject.iconG = 0.5;
+		self.dataObject.iconB = 0.5;
+	end
+end
+
+function ldb:OnZoneChanged()
+	self:UpdateByZoneTrackDecision();
+end
+
+function ldb:GSHS_OPTION_CHANGED()
+	self:UpdateByZoneTrackDecision();
+end
+
 function ldb:OnEnable()
 	local dataObject = LibDataBroker:NewDataObject(LDB_DATA_OBJECT_NAME, {
 		type = "launcher",
 		icon = "Interface\\Icons\\Ability_ThunderKing_LightningWhip",
+		iconR = 1,
+		iconG = 1,
+		iconB = 1,
 	});
 
 	function dataObject.OnClick(clickedframe, button)
@@ -61,6 +87,11 @@ function ldb:OnEnable()
 
 	function dataObject.OnTooltipShow(tt)
 		tt:AddLine("Guild Skada High Score");
+		if ldb.inTrackedZone then
+			tt:AddLine("[Tracked Zone]");
+		else
+			tt:AddLine("[Untracked Zone]");
+		end
 		tt:AddLine("|cffeda55fClick|r to show window.\n" ..
 			"|cffeda55fRight-Click|r to show options.", 0.2, 1, 0.2, true);
 	end
@@ -76,4 +107,22 @@ function ldb:OnEnable()
 	else
 		LibDBIcon:Show(LDB_ICON_NAME)
 	end
+
+	self.dataObject = dataObject;
+	self.inTrackedZone = false;
+	self:RegisterEvent("ZONE_CHANGED", "OnZoneChanged");
+	self:RegisterEvent("ZONE_CHANGED_INDOORS", "OnZoneChanged");
+	self:RegisterEvent("ZONE_CHANGED_NEW_AREA", "OnZoneChanged");
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnZoneChanged");
+	self:RegisterMessage("GSHS_OPTION_CHANGED");
+	self:UpdateByZoneTrackDecision();
+end
+
+function ldb:OnDisable()
+	self.dataObject = nil;
+	self:UnregisterEvent("ZONE_CHANGED");
+	self:UnregisterEvent("ZONE_CHANGED_INDOORS");
+	self:UnregisterEvent("ZONE_CHANGED_NEW_AREA");
+	self:UnregisterEvent("PLAYER_ENTERING_WORLD");
+	self:UnregisterMessage("GSHS_OPTION_CHANGED");
 end

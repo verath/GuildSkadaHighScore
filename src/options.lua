@@ -16,7 +16,7 @@ local wipe = wipe;
 
 -- Set up module
 local addon = addonTable[1];
-local options = addon:NewModule("options");
+local options = addon:NewModule("options", "AceEvent-3.0");
 addon.options = options;
 
 
@@ -61,6 +61,7 @@ local function createOptionsTable()
 						end,
 						set = function(info, v)
 							addon.ldb:SetMinimapIconShown(v);
+							addon.options:SendMessage("GSHS_OPTION_CHANGED");
 						end,
 					},
 				},
@@ -168,6 +169,7 @@ local function createOptionsTable()
 				end,
 				set = function(_, instanceId, state)
 					addon.db.realm.options["instanceTrackDecisions"][instanceId].shouldTrack = state;
+					addon.options:SendMessage("GSHS_OPTION_CHANGED");
 				end,
 			},
 			trackDecisionsPreviousExpansions = {
@@ -192,6 +194,7 @@ local function createOptionsTable()
 				end,
 				set = function(_, instanceId, state)
 					addon.db.realm.options["instanceTrackDecisions"][instanceId].shouldTrack = state;
+					addon.options:SendMessage("GSHS_OPTION_CHANGED");
 				end,
 			},
 			creditsSeparator = {
@@ -225,6 +228,7 @@ end
 function options.SetRealmOptionValue(self, info, value)
 	local key = info[#info];
 	addon.db.realm.options[key] = value;
+	addon.options:SendMessage("GSHS_OPTION_CHANGED");
 end
 
 function options:GetOptionsTable()

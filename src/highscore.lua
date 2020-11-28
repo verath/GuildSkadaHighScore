@@ -474,6 +474,27 @@ function highscore:PurgeParses(olderThanDate, minParsesPerPlayer)
 	end
 end
 
+function highscore:PurgeParsesByZoneId(zoneIdToPurge)
+	self:Debug("PurgeParsesByZoneId", zoneIdToPurge);
+	local db = self:GetDB();
+	
+	for guildName, guildData in pairs(db.guilds) do
+		for zoneId, _ in pairs(guildData.zones) do
+			if zoneId == zoneIdToPurge then
+				db.guilds[guildName].zones[zoneId] = nil;
+			end
+		end
+	end
+
+	db.zones[zoneIdToPurge] = nil;
+
+	for groupParseId, groupParse in pairs(db.groupParses) do
+		if groupParse.zoneId == zoneIdToPurge then
+			db.groupParses[groupParseId] = nil;
+		end
+	end
+end
+
 function highscore:GetDB()
 	return addon.db.realm.modules["highscore"];
 end

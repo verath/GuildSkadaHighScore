@@ -74,7 +74,7 @@ local function createOptionsTable()
 					RemoveParses = {
 						order = 10,
 						type = 'execute',
-						name = 'Remove All Parses',
+						name = 'Purge All Parses',
 						desc = 'Removes ALL stored parses.',
 						confirm = function()
 							return 'Are you sure you want to remove ALL stored parses?'
@@ -84,6 +84,29 @@ local function createOptionsTable()
 							wipe(addon.highscore:GetDB());
 							addon:SetupDatabase();
 							addon:Print("All parses have been removed.");
+						end,
+					},
+					RemoveParsesUntrackedRaids = {
+						order = 20,
+						type = 'execute',
+						name = 'Purge Untracked Raids',
+						desc = 'Removes all stored parses for unselected Tracked Raids (including Old Expansions).',
+						confirm = function()
+							return "Are you sure you want to remove ALL stored parses for unselected Tracked Raids?"
+								.. " This cannot be undone!";
+						end,
+						func = function()
+							local numRemoved = 0;
+							local zoneIdsToRemove = {};
+							for instanceId, trackDecision in pairs(addon.db.realm.options["instanceTrackDecisions"]) do
+								if not trackDecision.shouldTrack then
+									tinsert(zoneIdsToRemove, instanceId);
+								end
+							end
+							for _, zoneId in ipairs(zoneIdsToRemove) do
+								addon.highscore:PurgeParsesByZoneId(zoneId);
+							end
+							addon:Printf("Parses from untracked raids were removed.", #zoneIdsToRemove);
 						end,
 					},
 				},

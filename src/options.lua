@@ -124,15 +124,43 @@ local function createOptionsTable()
 				},
 			},
 			trackDecisions = {
-				name = "Tracked Raids",
-				desc = "Parses are recorded for selected raid zones.",
+				name = "Tracked Raids (Current Expansion)",
+				desc = "Parses are recorded for selected raid zones. Raids are added as you enter them.",
 				type = "multiselect",
 				width = "full",
 				order = 40,
 				values = function()
+					local expLevel = GetExpansionLevel();
 					local trackDecisions = {};
 					for instanceId, trackDecision in pairs(addon.db.realm.options["instanceTrackDecisions"]) do
-						trackDecisions[instanceId] = string.format("%s [%d]", trackDecision.instanceName, instanceId);
+						if not addon.knownRaids:IsRaidForOldExpansion(expLevel, instanceId) then
+							trackDecisions[instanceId] = string.format(
+								"%s [%d]", trackDecision.instanceName, instanceId);
+						end
+					end
+					return trackDecisions;
+				end,
+				get = function(_, instanceId)
+					return addon.db.realm.options["instanceTrackDecisions"][instanceId].shouldTrack;
+				end,
+				set = function(_, instanceId, state)
+					addon.db.realm.options["instanceTrackDecisions"][instanceId].shouldTrack = state;
+				end,
+			},
+			trackDecisionsPreviousExpansions = {
+				name = "Tracked Raids (Old Expansions)",
+				desc = "Parses are recorded for selected (old) raid zones. Raids are added as you enter them.",
+				type = "multiselect",
+				width = "full",
+				order = 50,
+				values = function()
+					local expLevel = GetExpansionLevel();
+					local trackDecisions = {};
+					for instanceId, trackDecision in pairs(addon.db.realm.options["instanceTrackDecisions"]) do
+						if addon.knownRaids:IsRaidForOldExpansion(expLevel, instanceId) then
+							trackDecisions[instanceId] = string.format(
+								"%s [%d]", trackDecision.instanceName, instanceId);
+						end
 					end
 					return trackDecisions;
 				end,

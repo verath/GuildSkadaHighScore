@@ -222,8 +222,20 @@ function addon:OnZoneChanged(evt)
 	if self.options:HasInstanceTrackDecision(instanceId) then
 		self:Debug("OnZoneChanged: Already has instance track decision");
 	else
-		self.options:SetInstanceTrackDecision(instanceId, instanceName, true)
-		self:Printf("Added '%s' (%d) to Tracked Raids, it can be deselected in GSHS config.", instanceName, instanceId)
+		local expansionLevel = GetExpansionLevel();
+		if not addon.knownRaids:IsRaidForOldExpansion(expansionLevel, instanceId) then
+			self.options:SetInstanceTrackDecision(instanceId, instanceName, true);
+			self:Printf(
+				"Added '%s' (%d) to Tracked Raids (Current Expansions), it can be deselected in GSHS config.",
+				instanceName,
+				instanceId);
+		else
+			self.options:SetInstanceTrackDecision(instanceId, instanceName, false);
+			self:Printf(
+				"Added '%s' (%d) to Tracked Raids (Old Expansions), it can be selected in GSHS config.",
+				instanceName,
+				instanceId);
+		end
 	end
 end
 

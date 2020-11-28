@@ -1,3 +1,10 @@
+# Version 1.0.19 (UNRELEASED)
+
+* Separate new tracked raids from old in options.
+* Only default track current current raids.
+* Add option to purge parses for untracked raids.
+* Tint minimap icon if not in tracked (raid) zone.
+
 # Version 1.0.18 (2020-11-27)
 
 * Updated for WoW patch 9.0.2.

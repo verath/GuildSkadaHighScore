@@ -1,4 +1,4 @@
-# Version 1.0.19 (UNRELEASED)
+# Version 1.0.19 (2020-12-01)
 
 * Separate new tracked raids from old in options.
 * Only default track current current raids.
